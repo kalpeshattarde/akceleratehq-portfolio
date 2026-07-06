@@ -1,6 +1,0 @@
-.env
-*.secret
-credentials.json
-service_account.json
-node_modules/
-.DS_Store

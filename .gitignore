@@ -1,10 +1,19 @@
 .env
-*.pyc
-__pycache__/
-.pytest_cache/
-.mypy_cache/
+.env.*
+!.env.example
+
+node_modules/
+dist/
+build/
+.next/
+
+*.log
+*.tmp
 .DS_Store
 Thumbs.db
-project_*/output_samples/*.tmp
-project_*/output_samples/*.log
 
+# Local n8n/runtime files
+.n8n/
+credentials.json
+credentials*.json
+secrets/

@@ -1,4 +1,0 @@
-order_id,row_number,severity,issues
-SO-1008,8,medium,missing_delivery_date_for_closed_or_delayed_order
-SO-1013,13,high,missing_number
-SO-1014,14,high,invalid_date:invalid-date
