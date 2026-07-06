@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 680" role="img" aria-labelledby="title desc">
+  <title id="title">AKcelerateHQ Lead Capture Automation workflow map</title>
+  <desc id="desc">Workflow map showing Google Sheets intake, AI audit scoring, sheet update, confirmation email, scheduled smart routing, and hot, warm, and cold lead follow-up paths.</desc>
+  <rect width="1200" height="680" fill="#f7f8fb"/>
+  <text x="48" y="56" font-family="Arial, sans-serif" font-size="28" font-weight="700" fill="#172033">AKcelerateHQ Lead Capture Automation</text>
+  <text x="48" y="88" font-family="Arial, sans-serif" font-size="15" fill="#536174">Google Sheets intake, AI audit scoring, and smart lead routing</text>
+
+  <g font-family="Arial, sans-serif" font-size="14" fill="#172033">
+    <rect x="48" y="126" width="160" height="72" rx="8" fill="#dff3e6" stroke="#3b8f5a"/>
+    <text x="70" y="156" font-weight="700">Google Sheets</text>
+    <text x="70" y="178">row added</text>
+
+    <rect x="248" y="126" width="178" height="72" rx="8" fill="#e9f0ff" stroke="#5476c8"/>
+    <text x="270" y="156" font-weight="700">Normalize Lead</text>
+    <text x="270" y="178">fields + WhatsApp</text>
+
+    <rect x="466" y="126" width="178" height="72" rx="8" fill="#fff2d8" stroke="#b98428"/>
+    <text x="488" y="156" font-weight="700">Build AI Prompt</text>
+    <text x="488" y="178">audit context</text>
+
+    <rect x="684" y="126" width="178" height="72" rx="8" fill="#efe7ff" stroke="#7c5cc4"/>
+    <text x="706" y="156" font-weight="700">AI Audit Score</text>
+    <text x="706" y="178">structured JSON</text>
+
+    <rect x="902" y="126" width="178" height="72" rx="8" fill="#e7f6f7" stroke="#3c8d94"/>
+    <text x="924" y="156" font-weight="700">Update Sheet</text>
+    <text x="924" y="178">score + status</text>
+
+    <rect x="902" y="238" width="178" height="72" rx="8" fill="#fff0f0" stroke="#c85b5b"/>
+    <text x="924" y="268" font-weight="700">Confirmation</text>
+    <text x="924" y="290">Gmail to lead</text>
+
+    <rect x="48" y="372" width="184" height="72" rx="8" fill="#f0f3f8" stroke="#6b7280"/>
+    <text x="70" y="402" font-weight="700">30-Min Schedule</text>
+    <text x="70" y="424">read scored leads</text>
+
+    <rect x="272" y="372" width="190" height="72" rx="8" fill="#e9f0ff" stroke="#5476c8"/>
+    <text x="294" y="402" font-weight="700">Filter Pending</text>
+    <text x="294" y="424">skip routed rows</text>
+
+    <rect x="502" y="372" width="206" height="72" rx="8" fill="#fff2d8" stroke="#b98428"/>
+    <text x="524" y="402" font-weight="700">Decide Route</text>
+    <text x="524" y="424">score + form signals</text>
+
+    <rect x="768" y="300" width="196" height="82" rx="8" fill="#dff3e6" stroke="#3b8f5a"/>
+    <text x="790" y="332" font-weight="700">Hot Lead</text>
+    <text x="790" y="354">Calendar + Meet</text>
+    <text x="790" y="374">Discovery email</text>
+
+    <rect x="768" y="420" width="196" height="82" rx="8" fill="#fff2d8" stroke="#b98428"/>
+    <text x="790" y="452" font-weight="700">Warm Lead</text>
+    <text x="790" y="474">Owner review</text>
+    <text x="790" y="494">Qualification email</text>
+
+    <rect x="768" y="540" width="196" height="82" rx="8" fill="#e7f6f7" stroke="#3c8d94"/>
+    <text x="790" y="572" font-weight="700">Cold Lead</text>
+    <text x="790" y="594">Nurture email</text>
+    <text x="790" y="614">Status update</text>
+  </g>
+
+  <g stroke="#6b7280" stroke-width="2" fill="none" marker-end="url(#arrow)">
+    <path d="M208 162 H248"/>
+    <path d="M426 162 H466"/>
+    <path d="M644 162 H684"/>
+    <path d="M862 162 H902"/>
+    <path d="M991 198 V238"/>
+    <path d="M232 408 H272"/>
+    <path d="M462 408 H502"/>
+    <path d="M708 408 C736 408 736 341 768 341"/>
+    <path d="M708 408 H768"/>
+    <path d="M708 408 C736 408 736 581 768 581"/>
+  </g>
+
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#6b7280"/>
+    </marker>
+  </defs>
+
+  <text x="48" y="640" font-family="Arial, sans-serif" font-size="13" fill="#536174">Optional WhatsApp HTTP nodes remain disabled until provider credentials, consent, and opt-out handling are configured.</text>
+</svg>

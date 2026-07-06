@@ -1,19 +1,20 @@
 # n8n AI Automations Portfolio
 
-This repository contains portfolio-ready n8n automation projects. Each project is organized as a case study with a workflow export, implementation notes, setup guidance, supporting files, and a preview image.
+Project-centric portfolio of AI automation workflows built for business review. Each project folder contains its own workflow export, setup notes, security notes, sample data, and offline validation assets.
 
 ## Projects
 
-| # | Project | Summary | Main tools |
+| # | Project | Business value | Main tools |
 |---|---|---|---|
-| 01 | [AKcelerateHQ Lead Generation Engine](01-akceleratehq-lead-generation-engine/README.md) | Google Form and Google Sheets intake automation that scores leads, generates proposal content, sends email/WhatsApp follow-ups, logs outcomes, and supports an inbound WhatsApp AI assistant. | n8n, Google Forms, Google Sheets, Gmail, OpenAI, Wassenger |
+| 01 | [AKcelerateHQ Lead Capture Automation](01-akceleratehq-lead-capture-automation/README.md) | Scores automation-audit leads, confirms receipt, and routes each lead to discovery, manual review, or nurture follow-up based on score and form context. | n8n, Google Sheets, Gmail, Google Calendar, OpenAI, optional WhatsApp provider |
 
 ## Repository Standard
 
-- Public workflow exports do not include OAuth credentials, API keys, or real n8n credential IDs.
-- Each project includes a README, setup guide, security notes, workflow export, and relevant supporting artifacts.
-- Project write-ups are written as technical portfolio case studies for recruiters and hiring teams.
+- Public workflow exports remove OAuth credentials, API keys, private sheet IDs, and live n8n credential IDs.
+- Project documentation is written as a case study: business problem, workflow behavior, setup, security, and validation.
+- Offline scripts use mock/sample data and standard library code so reviewers can inspect logic without external API access.
+- API-dependent n8n workflows are clearly labeled as credential-ready public exports, not claimed as production deployments.
 
 ## How To Review
 
-Start with the project README, then inspect the workflow JSON under the project `workflows` folder. The workflow export is designed for review and import into n8n after replacing placeholders and connecting your own credentials.
+Start with the project README, inspect the sanitized workflow JSON under the project `workflows` folder, then run the local simulation script listed in the project README. The workflow export is designed for n8n import after replacing placeholders and connecting your own credentials.

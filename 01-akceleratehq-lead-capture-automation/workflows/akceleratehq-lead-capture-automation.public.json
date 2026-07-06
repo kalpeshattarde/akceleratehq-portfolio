@@ -1,0 +1,1904 @@
+{
+  "name": "AKcelerateHQ Lead Capture Automation - Public Export",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Audit Leads",
+          "mode": "name",
+          "cachedResultName": "Audit Leads"
+        },
+        "event": "rowAdded",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "85ec18aa-80fe-4d72-b4a5-47134e618d25",
+      "name": "Google Sheets Trigger"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Audit Leads",
+          "mode": "name",
+          "cachedResultName": "Audit Leads"
+        },
+        "options": {}
+      },
+      "id": "79490ffa-4536-4b90-903e-810e924b1735",
+      "name": "Read Audit Leads Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        304,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "function get(row, keys) {\n  for (const key of keys) {\n    if (row[key] !== undefined && row[key] !== null && String(row[key]).trim() !== '') {\n      return row[key];\n    }\n  }\n  return '';\n}\n\nfunction normalizeWhatsApp(input) {\n  if (!input) return '';\n\n  let v = String(input).replace(/[^0-9+]/g, '');\n\n  if (v.startsWith('+')) return v;\n  if (v.length === 10) return '+91' + v;\n  if (v.startsWith('91') && v.length === 12) return '+' + v;\n\n  return v;\n}\n\nfunction isYes(input) {\n  return ['yes', 'true', '1', 'y'].includes(String(input || '').toLowerCase().trim());\n}\n\nconst output = [];\n\nfor (const item of $input.all()) {\n  const row = item.json;\n\n  const status = String(get(row, ['status', 'Status'])).toLowerCase().trim();\n  const processed = String(get(row, ['processed', 'Processed'])).toLowerCase().trim();\n\n  const alreadyDone =\n    processed === 'true' ||\n    processed === 'yes' ||\n    [\n      'ai scored',\n      'scored',\n      'discovery scheduled',\n      'manual review',\n      'nurture',\n      'proposal sent',\n      'not fit',\n      'closed',\n      'won',\n      'lost'\n    ].includes(status);\n\n  if (alreadyDone) continue;\n\n  const fullName = get(row, ['full_name', 'Full name', 'Full Name']);\n  const workEmail = get(row, [\n    'work_email',\n    'Work email',\n    'Email address',\n    'Email Address',\n    'Email'\n  ]);\n  const rawWhatsapp = get(row, ['contact_no', 'Contact No', 'phone', 'Phone']);\n  const companyName = get(row, ['company_name', 'Company name', 'Company Name']);\n\n  const consent = get(row, [\n    'I agree that AKcelerateHQ may contact me regarding my automation audit request.',\n    'consent',\n    'Consent'\n  ]);\n\n  if (!fullName || !workEmail || !companyName) {\n    continue;\n  }\n\n  if (consent && !isYes(consent)) {\n    continue;\n  }\n\n  output.push({\n    json: {\n      row_number: get(row, ['row_number', 'Row Number', 'rowNumber']),\n      timestamp: get(row, ['timestamp', 'Timestamp']),\n      email_address: get(row, ['Email address', 'Email Address', 'email_address']),\n      full_name: fullName,\n      work_email: workEmail,\n      contact_no: normalizeWhatsApp(rawWhatsapp),\n      role_in_business: get(row, ['Your Role in Business', 'role_in_business']),\n      company_name: companyName,\n      website: get(row, ['Website(Optional)', 'Website', 'website']),\n      industry: get(row, ['Industry', 'industry']),\n      company_size: get(row, ['Company size', 'company_size']),\n      monthly_revenue: get(row, ['Monthly revenue', 'monthly_revenue']),\n      country: get(row, ['Country', 'country']),\n      tools_currently_use: get(row, ['Tools you currently use', 'tools_currently_use']),\n      operation_today: get(row, [\n        'How does your operation run today? (Describe your team, processes, and handoffs..)',\n        'operation_today'\n      ]),\n      biggest_pain: get(row, [\n        'Where is the biggest pain? (pick all that apply)',\n        'biggest_pain'\n      ]),\n      hours_lost_per_week: get(row, [\n        'Estimated hours lost per week to manual work',\n        'hours_lost_per_week'\n      ]),\n      team_ai_experience: get(row, [\n        \"Your team's AI experience\",\n        'team_ai_experience'\n      ]),\n      existing_automations: get(row, [\n        'Existing automations (Zapier, scripts, etc.)',\n        'existing_automations'\n      ]),\n      data_readiness: get(row, ['Data readiness', 'data_readiness']),\n      workflows_ai_handle: get(row, [\n        \"Which workflows would you like AI to handle?\\n\\n(Be specific — e.g., 'classify inbound emails, draft replies, sync to CRM')\",\n        'Which workflows would you like AI to handle?',\n        'workflows_ai_handle'\n      ]),\n      desired_outcomes: get(row, ['Desired outcomes', 'desired_outcomes']),\n      timeline: get(row, ['Timeline', 'timeline']),\n      budget: get(row, ['Budget', 'budget']),\n      decision_authority: get(row, ['Decision authority', 'decision_authority']),\n      anything_else: get(row, [\n        'Anything else we should know?  (Constraints, integrations, security needs...)',\n        'anything_else'\n      ]),\n      heard_about_us: get(row, [\n        'How did you hear about us?  (Mention your referral in others)',\n        'heard_about_us'\n      ]),\n      file_uploads: get(row, [\n        'Upload any helpful files such as workflow screenshots, Excel sheets, SOPs, reports, CRM exports, invoice samples, lead sheets, process documents, or project requirements.',\n        'file_uploads'\n      ]),\n      consent,\n      status: 'New',\n      processed: false,\n      updated_at: new Date().toISOString()\n    }\n  });\n}\n\nreturn output;"
+      },
+      "id": "7802d30b-f11e-422e-af03-5d77e05b077f",
+      "name": "Clean + Filter + Normalize WhatsApp",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        576,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "options": {
+          "reset": false
+        }
+      },
+      "id": "8b35ca87-6106-43df-8dde-c6452b5356d7",
+      "name": "Audit Lead Loop",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        832,
+        0
+      ],
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "let base = {};\n\ntry {\n  base = $('Audit Lead Loop').item.json;\n} catch (error) {\n  base = $json;\n}\n\nconst auditContext = `\nAKcelerateHQ helps businesses automate repetitive work using:\n- n8n workflow automation\n- AI agents\n- CRM integrations\n- Google Workspace / Microsoft 365 automations\n- dashboards and reporting\n- WhatsApp/email follow-up systems\n- document processing and approval workflows\n- smart internal systems\n`;\n\nconst prompt = `\nYou are AKcelerateHQ's Automation Audit Lead Scoring Agent.\n\n${auditContext}\n\nLead details:\nName: ${base.full_name}\nWork email: ${base.work_email}\nContact No: ${base.contact_no}\nRole in Business: ${base.role_in_business}\nCompany name: ${base.company_name}\nWebsite: ${base.website}\nIndustry: ${base.industry}\nCompany size: ${base.company_size}\nMonthly revenue: ${base.monthly_revenue}\nCountry: ${base.country}\n\nTools currently used:\n${base.tools_currently_use}\n\nHow operation runs today:\n${base.operation_today}\n\nBiggest pains:\n${base.biggest_pain}\n\nEstimated hours lost per week:\n${base.hours_lost_per_week}\n\nTeam AI experience:\n${base.team_ai_experience}\n\nExisting automations:\n${base.existing_automations}\n\nData readiness:\n${base.data_readiness}\n\nWorkflows they want AI to handle:\n${base.workflows_ai_handle}\n\nDesired outcomes:\n${base.desired_outcomes}\n\nTimeline:\n${base.timeline}\n\nBudget:\n${base.budget}\n\nDecision authority:\n${base.decision_authority}\n\nConstraints / integrations / security:\n${base.anything_else}\n\nHow they heard about us:\n${base.heard_about_us}\n\nUploaded links:\n${base.file_uploads}\n\nScore this lead from 0 to 100.\n\nScoring logic:\n1. Business pain severity: 20\n2. Automation fit: 20\n3. Budget fit: 15\n4. Timeline urgency: 15\n5. Decision authority: 10\n6. Data readiness and tools: 10\n7. Revenue/company size fit: 10\n\nCategories:\n- Hot = 75 to 100\n- Warm = 45 to 74\n- Cold = below 45\n\nRecommended offers:\n- Priority Discovery Call + ROI Audit\n- Starter Automation Demo\n- Lead Qualification + CRM Follow-up System\n- Reporting Dashboard + Owner Summary\n- Document Processing + Approval Workflow\n- AI Customer Support Triage + Reply Drafting\n- Free Audit / Nurture\n- Not a Fit Right Now\n\nReturn only valid JSON matching the structured output parser.\nDo not use markdown.\nDo not include text outside JSON.\n`;\n\nreturn {\n  json: {\n    ...base,\n    ai_prompt: prompt\n  }\n};"
+      },
+      "id": "6d7193b3-3aef-470d-ad7a-60f64d2f0bf7",
+      "name": "Build AI Audit Score Prompt",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1312,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.ai_prompt }}",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1600,
+        0
+      ],
+      "id": "f7150176-5163-4731-bbc9-68354b70a48b",
+      "name": "AI Agent - Score Audit Lead",
+      "executeOnce": false
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"audit_score\": 88,\n  \"lead_category\": \"Hot\",\n  \"priority_reason\": \"Clear manual workflow pain, strong urgency, sufficient budget and decision authority.\",\n  \"recommended_offer\": \"Priority Discovery Call + ROI Audit\",\n  \"recommended_workflow\": \"Lead Qualification + CRM Follow-up System\",\n  \"next_action\": \"Book discovery call within 24 hours\",\n  \"business_summary\": \"The company has repetitive manual sales and operations follow-ups that can be automated.\",\n  \"pain_summary\": \"Manual data entry and lead qualification are causing delay and lost staff hours.\",\n  \"suggested_solution\": \"Build a Google Form/Sheet to CRM workflow with AI lead scoring, WhatsApp follow-up and dashboard.\",\n  \"estimated_hours_lost_weekly\": 20,\n  \"monthly_value_estimate_usd\": 1200,\n  \"automation_fit_score\": 18,\n  \"pain_severity_score\": 17,\n  \"urgency_score\": 14,\n  \"budget_score\": 12,\n  \"authority_score\": 9,\n  \"data_readiness_score\": 8,\n  \"revenue_fit_score\": 8,\n  \"discovery_questions\": [\n    \"Which manual task takes the most time every week?\",\n    \"Which tools should the automation integrate with first?\",\n    \"What outcome would make this project successful in 30 days?\"\n  ],\n  \"risks_or_blockers\": [\n    \"Budget may need confirmation\",\n    \"Current data quality should be checked\"\n  ],\n  \"tools_to_integrate\": [\n    \"Google Sheets\",\n    \"Gmail\",\n    \"WhatsApp\",\n    \"CRM\"\n  ],\n  \"owner_alert\": \"High priority lead. Call quickly.\",\n  \"lead_reply_email_subject\": \"Your AKcelerateHQ automation audit has been reviewed\",\n  \"lead_reply_email_body\": \"Your use case looks like a strong fit for a focused automation demo. We will contact you with the next step.\",\n  \"whatsapp_message\": \"Hi, thanks for submitting the AKcelerateHQ Automation Audit. Your use case looks relevant, and we will share the next step soon.\",\n  \"internal_notes\": \"Verify tools, budget and decision authority on call.\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1744,
+        208
+      ],
+      "id": "5fb6d2a5-c066-4c1e-a39a-c5e4131def6c",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-5-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        1568,
+        208
+      ],
+      "id": "51f9c624-27b9-4820-b45e-511d65d3c2be",
+      "name": "OpenAI Chat Model"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const base = $('Build AI Audit Score Prompt').item.json;\n\nfunction parseAiOutput(input) {\n  if (!input) return {};\n\n  if (typeof input === 'object') {\n    if (input.output && typeof input.output === 'object') return input.output;\n    if (input.output && typeof input.output === 'string') return parseAiOutput(input.output);\n    return input;\n  }\n\n  if (typeof input === 'string') {\n    let text = input.trim();\n\n    text = text.replace(/^```json/i, '');\n    text = text.replace(/^```/i, '');\n    text = text.replace(/```$/i, '');\n    text = text.trim();\n\n    try {\n      return JSON.parse(text);\n    } catch (error) {\n      const match = text.match(/\\{[\\s\\S]*\\}/);\n      if (match) {\n        try {\n          return JSON.parse(match[0]);\n        } catch (error2) {}\n      }\n      return {};\n    }\n  }\n\n  return {};\n}\n\nfunction asText(value) {\n  if (Array.isArray(value)) return value.join(' | ');\n  if (value === undefined || value === null) return '';\n  return String(value);\n}\n\nlet raw =\n  $json.output ||\n  $json.response?.output ||\n  $json.text ||\n  $json;\n\nconst parsed = parseAiOutput(raw);\n\nconst score = Math.max(0, Math.min(100, Number(parsed.audit_score || 0)));\n\nlet category = parsed.lead_category;\nif (!['Hot', 'Warm', 'Cold'].includes(category)) {\n  category = score >= 75 ? 'Hot' : score >= 45 ? 'Warm' : 'Cold';\n}\n\nlet nextAction = parsed.next_action || '';\nif (!nextAction) {\n  if (category === 'Hot') nextAction = 'Book discovery call within 24 hours';\n  else if (category === 'Warm') nextAction = 'Send manual review summary and ask qualification questions';\n  else nextAction = 'Add to nurture list';\n}\n\nlet callStatus = 'Not Booked';\nlet proposalStatus = 'Not Started';\n\nif (category === 'Hot') {\n  callStatus = 'To Book';\n  proposalStatus = 'Prepare Draft';\n} else if (category === 'Warm') {\n  callStatus = 'Manual Review Needed';\n  proposalStatus = 'Wait for Qualification';\n} else {\n  callStatus = 'Not Required';\n  proposalStatus = 'Not Required';\n}\n\nreturn {\n  json: {\n    ...base,\n\n    processed: true,\n    status: 'Scored',\n\n    audit_score: score,\n    lead_category: category,\n    priority_reason: parsed.priority_reason || '',\n    recommended_offer: parsed.recommended_offer || '',\n    recommended_workflow: parsed.recommended_workflow || '',\n    next_action: nextAction,\n\n    business_summary: parsed.business_summary || '',\n    pain_summary: parsed.pain_summary || '',\n    suggested_solution: parsed.suggested_solution || '',\n    estimated_hours_lost_weekly: parsed.estimated_hours_lost_weekly || '',\n    monthly_value_estimate_usd: parsed.monthly_value_estimate_usd || '',\n\n    automation_fit_score: parsed.automation_fit_score || '',\n    pain_severity_score: parsed.pain_severity_score || '',\n    urgency_score: parsed.urgency_score || '',\n    budget_score: parsed.budget_score || '',\n    authority_score: parsed.authority_score || '',\n    data_readiness_score: parsed.data_readiness_score || '',\n    revenue_fit_score: parsed.revenue_fit_score || '',\n\n    discovery_questions: asText(parsed.discovery_questions),\n    risks_or_blockers: asText(parsed.risks_or_blockers),\n    tools_to_integrate: asText(parsed.tools_to_integrate),\n\n    recommended_action: nextAction,\n    assigned_owner: 'Kalpesh',\n    call_status: callStatus,\n    proposal_status: proposalStatus,\n    n8n_sent: true,\n    n8n_response: 'AI audit scoring completed',\n    notes: parsed.internal_notes || '',\n    lead_reply_email_subject: parsed.lead_reply_email_subject || 'Your AKcelerateHQ automation audit has been received',\n    lead_reply_email_body: parsed.lead_reply_email_body || '',\n    whatsapp_message: parsed.whatsapp_message || '',\n    updated_at: new Date().toISOString()\n  }\n};"
+      },
+      "id": "98f43a43-cb40-4825-b07b-1ac7b66e7a3b",
+      "name": "Parse AI Audit Score",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1904,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Audit Leads",
+          "mode": "name",
+          "cachedResultName": "Audit Leads"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "row_number": "={{$json.row_number}}",
+            "processed": "TRUE",
+            "status": "={{$json.status}}",
+            "audit_score": "={{$json.audit_score}}",
+            "lead_category": "={{$json.lead_category}}",
+            "priority_reason": "={{$json.priority_reason}}",
+            "recommended_offer": "={{$json.recommended_offer}}",
+            "next_action": "={{$json.next_action}}",
+            "assigned_owner": "={{$json.assigned_owner}}",
+            "call_status": "={{$json.call_status}}",
+            "proposal_status": "={{$json.proposal_status}}",
+            "n8n_sent": "TRUE",
+            "n8n_response": "={{$json.n8n_response}}",
+            "notes": "={{$json.notes}}",
+            "updated_at": "={{$json.updated_at}}"
+          },
+          "matchingColumns": [
+            "Email address"
+          ],
+          "schema": [
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Email address",
+              "displayName": "Email address",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Full name",
+              "displayName": "Full name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Work email",
+              "displayName": "Work email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Contact No",
+              "displayName": "Contact No",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Your Role in Business",
+              "displayName": "Your Role in Business",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Company name",
+              "displayName": "Company name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Website(Optional)",
+              "displayName": "Website(Optional)",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Industry",
+              "displayName": "Industry",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Company size",
+              "displayName": "Company size",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Monthly revenue",
+              "displayName": "Monthly revenue",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Country",
+              "displayName": "Country",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Tools you currently use",
+              "displayName": "Tools you currently use",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "How does your operation run today? (Describe your team, processes, and handoffs..)",
+              "displayName": "How does your operation run today? (Describe your team, processes, and handoffs..)",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Where is the biggest pain? (pick all that apply)",
+              "displayName": "Where is the biggest pain? (pick all that apply)",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Estimated hours lost per week to manual work",
+              "displayName": "Estimated hours lost per week to manual work",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Your team's AI experience",
+              "displayName": "Your team's AI experience",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Existing automations (Zapier, scripts, etc.)",
+              "displayName": "Existing automations (Zapier, scripts, etc.)",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Data readiness",
+              "displayName": "Data readiness",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Which workflows would you like AI to handle?\n\n(Be specific — e.g., 'classify inbound emails, draft replies, sync to CRM')",
+              "displayName": "Which workflows would you like AI to handle?\n\n(Be specific — e.g., 'classify inbound emails, draft replies, sync to CRM')",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Desired outcomes",
+              "displayName": "Desired outcomes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Timeline",
+              "displayName": "Timeline",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Budget",
+              "displayName": "Budget",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Decision authority",
+              "displayName": "Decision authority",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Anything else we should know?  (Constraints, integrations, security needs...)",
+              "displayName": "Anything else we should know?  (Constraints, integrations, security needs...)",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "How did you hear about us?  (Mention your referral in others)",
+              "displayName": "How did you hear about us?  (Mention your referral in others)",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Upload any helpful files such as workflow screenshots, Excel sheets, SOPs, reports, CRM exports, invoice samples, lead sheets, process documents, or project requirements.",
+              "displayName": "Upload any helpful files such as workflow screenshots, Excel sheets, SOPs, reports, CRM exports, invoice samples, lead sheets, process documents, or project requirements.",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "I agree that AKcelerateHQ may contact me regarding my automation audit request.",
+              "displayName": "I agree that AKcelerateHQ may contact me regarding my automation audit request.",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "processed",
+              "displayName": "processed",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "audit_score",
+              "displayName": "audit_score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "lead_category",
+              "displayName": "lead_category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "priority_reason",
+              "displayName": "priority_reason",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "recommended_offer",
+              "displayName": "recommended_offer",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "next_action",
+              "displayName": "next_action",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "assigned_owner",
+              "displayName": "assigned_owner",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "call_status",
+              "displayName": "call_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "proposal_status",
+              "displayName": "proposal_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "n8n_sent",
+              "displayName": "n8n_sent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "n8n_response",
+              "displayName": "n8n_response",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "notes",
+              "displayName": "notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "updated_at",
+              "displayName": "updated_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "5df61305-b3a3-4e55-a9ca-68dd653c04dd",
+      "name": "Update Sheet - AI Scored",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        2192,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{$json.work_email}}",
+        "subject": "={{$json.lead_reply_email_subject}}",
+        "message": "=Hi {{$json.full_name}},<br><br>Thank you for submitting the <b>AKcelerateHQ Automation Audit</b> form.<br><br>We reviewed your answers and identified this possible automation opportunity:<br><br><b>{{$json.recommended_workflow || $json.recommended_offer}}</b><br><br>{{$json.lead_reply_email_body || 'Our team will contact you soon with the next step.'}}<br><br>Regards,<br>AKcelerateHQ<br>Automate the busywork. Accelerate growth.",
+        "options": {}
+      },
+      "id": "a2e3d929-231f-452d-b214-833812f55336",
+      "name": "Send Confirmation Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        2464,
+        0
+      ],
+      "webhookId": "audit-confirmation-email"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://YOUR_WHATSAPP_PROVIDER_API/send",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_WHATSAPP_PROVIDER_TOKEN"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"to\": $json.contact_no,\n  \"message\": $json.whatsapp_message || (\"Hi \" + $json.full_name + \", thanks for submitting the AKcelerateHQ Automation Audit. We reviewed your details and will share the next step soon.\")\n}",
+        "options": {}
+      },
+      "id": "1f7a03ec-0a58-4b5f-a690-8af371e0aafd",
+      "name": "Optional WhatsApp Confirmation - Configure Provider",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2736,
+        0
+      ],
+      "disabled": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 30
+            }
+          ]
+        }
+      },
+      "id": "5fc63501-cbdd-44cd-9eef-d0acfb9b8932",
+      "name": "Schedule - Smart Routing",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        192,
+        784
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Audit Leads",
+          "mode": "name",
+          "cachedResultName": "Audit Leads"
+        },
+        "options": {}
+      },
+      "id": "3c1285a5-4fc2-4a90-ae9c-a863dc232160",
+      "name": "Read Scored Audit Leads",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        432,
+        784
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const output = [];\n\nfor (const item of $input.all()) {\n  const row = item.json;\n\n  const status = String(row.status || '').toLowerCase().trim();\n  const category = String(row.lead_category || '').trim();\n  const score = Number(row.audit_score || 0);\n\n  const alreadyRoutedStatuses = [\n    'discovery scheduled',\n    'manual review',\n    'nurture',\n    'proposal sent',\n    'not fit',\n    'closed',\n    'won',\n    'lost'\n  ];\n\n  if (alreadyRoutedStatuses.includes(status)) continue;\n\n  const isScored = status === 'scored' || status === 'ai scored' || score > 0 || ['Hot', 'Warm', 'Cold'].includes(category);\n\n  if (isScored) {\n    output.push({ json: row });\n  }\n}\n\nreturn output;"
+      },
+      "id": "fbb5e9aa-69cb-41dc-924c-6705ed978ecd",
+      "name": "Filter Scored Leads Pending Routing",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        688,
+        784
+      ]
+    },
+    {
+      "parameters": {
+        "options": {
+          "reset": "={{ false }}"
+        }
+      },
+      "id": "c90d82de-0a23-4975-a590-eed6baae95a7",
+      "name": "Audit Lead Routing Loop",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        960,
+        784
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "function normalizePhone(input) {\n  if (!input) return '';\n  let v = String(input).replace(/[^0-9+]/g, '');\n  if (v.startsWith('+')) return v;\n  if (v.length === 10) return '+91' + v;\n  if (v.startsWith('91') && v.length === 12) return '+' + v;\n  return v;\n}\n\nfunction containsAny(text, keywords) {\n  text = String(text || '').toLowerCase();\n  return keywords.some(k => text.includes(k.toLowerCase()));\n}\n\nfunction getTomorrow11AMIST() {\n  const now = new Date();\n  const istNow = new Date(now.getTime() + 5.5 * 60 * 60 * 1000);\n  const year = istNow.getUTCFullYear();\n  const month = istNow.getUTCMonth();\n  const day = istNow.getUTCDate() + 1;\n  const startUtc = new Date(Date.UTC(year, month, day, 5, 30, 0));\n  const endUtc = new Date(startUtc.getTime() + 30 * 60 * 1000);\n  return {\n    start: startUtc.toISOString(),\n    end: endUtc.toISOString()\n  };\n}\n\nconst row = $json;\n\nconst score = Number(row.audit_score || 0);\nconst category = String(row.lead_category || '').trim();\n\nconst budget = String(row.Budget || row.budget || '').toLowerCase();\nconst timeline = String(row.Timeline || row.timeline || '').toLowerCase();\nconst authority = String(row['Decision authority'] || row.decision_authority || '').toLowerCase();\nconst pain = String(row['Where is the biggest pain? (pick all that apply)'] || row.biggest_pain || '').toLowerCase();\nconst workflowWanted = String(row[\"Which workflows would you like AI to handle?\\n\\n(Be specific — e.g., 'classify inbound emails, draft replies, sync to CRM')\"] || row.workflows_ai_handle || '').toLowerCase();\nconst outcomes = String(row['Desired outcomes'] || row.desired_outcomes || '').toLowerCase();\nconst tools = String(row['Tools you currently use'] || row.tools_currently_use || '').toLowerCase();\nconst revenue = String(row['Monthly revenue'] || row.monthly_revenue || '').toLowerCase();\nconst hoursLost = String(row['Estimated hours lost per week to manual work'] || row.hours_lost_per_week || '').toLowerCase();\nconst industry = String(row.Industry || row.industry || '').toLowerCase();\n\nconst fullName = row['Full name'] || row.full_name || '';\nconst companyName = row['Company name'] || row.company_name || '';\nconst workEmail = row['Work email'] || row.work_email || row['Email address'] || '';\nconst contactNo = normalizePhone(row['Contact No'] || row.contact_no || '');\n\nlet workflow_type = 'general_automation';\n\nif (containsAny(pain + workflowWanted, ['lead qualification', 'lead', 'crm', 'sales', 'conversion'])) {\n  workflow_type = 'lead_crm_automation';\n} else if (containsAny(pain + workflowWanted, ['report', 'dashboard', 'forecasting', 'planning', 'analytics', 'power bi', 'powerbi'])) {\n  workflow_type = 'reporting_dashboard';\n} else if (containsAny(pain + workflowWanted, ['customer support', 'support', 'reply', 'inbound emails', 'draft replies'])) {\n  workflow_type = 'support_email_ai';\n} else if (containsAny(pain + workflowWanted, ['document', 'invoice', 'sop', 'approval', 'processing'])) {\n  workflow_type = 'document_processing';\n} else if (containsAny(pain + workflowWanted, ['onboarding', 'handoff', 'operations', 'approval workflows'])) {\n  workflow_type = 'operations_workflow';\n} else if (containsAny(pain + workflowWanted, ['inventory', 'supply chain', 'quality', 'compliance'])) {\n  workflow_type = 'msme_operations_control';\n} else if (containsAny(tools + industry, ['shopify', 'stripe', 'ecommerce', 'e-commerce'])) {\n  workflow_type = 'ecommerce_automation';\n}\n\nlet recommendedOffer = row.recommended_offer || 'Automation Audit + Starter Workflow Demo';\n\nif (workflow_type === 'lead_crm_automation') {\n  recommendedOffer = 'Lead Qualification + CRM Follow-up System';\n} else if (workflow_type === 'reporting_dashboard') {\n  recommendedOffer = 'Reporting Dashboard + Owner Summary Automation';\n} else if (workflow_type === 'support_email_ai') {\n  recommendedOffer = 'AI Customer Support Triage + Reply Drafting';\n} else if (workflow_type === 'document_processing') {\n  recommendedOffer = 'Document Processing + Approval Workflow';\n} else if (workflow_type === 'operations_workflow') {\n  recommendedOffer = 'MSME Operations Workflow Automation';\n} else if (workflow_type === 'msme_operations_control') {\n  recommendedOffer = 'AI MSME Operations Control System';\n} else if (workflow_type === 'ecommerce_automation') {\n  recommendedOffer = 'E-commerce Order, CRM & Reporting Automation';\n}\n\nconst strongBudget =\n  containsAny(budget, ['$1,000', '$2,000', '$6,000', '6000', 'prefer to discuss']) ||\n  containsAny(revenue, ['$25,000', '$100,000', '100,000']);\n\nconst weakBudget =\n  containsAny(budget, ['less than $300', 'not sure yet']) ||\n  containsAny(revenue, ['pre-revenue']);\n\nconst urgentTimeline = containsAny(timeline, ['asap', '< 21 days']);\nconst flexibleTimeline = containsAny(timeline, ['1-3 months', 'flexible']);\nconst justExploring = containsAny(timeline, ['just exploring']);\n\nconst hasAuthority = containsAny(authority, ['yes, i decide', 'buying committee']);\nconst lowAuthority = containsAny(authority, ['researching', 'influence']);\n\nconst highPain =\n  containsAny(hoursLost, ['15–40', '40–100', '100+']) ||\n  containsAny(pain, [\n    'manual data entry',\n    'slow customer support',\n    'lead qualification overhead',\n    'document processing',\n    'repetitive reporting'\n  ]);\n\nlet route = 'manual_review';\nlet finalCategory = category || 'Warm';\nlet finalScore = score;\nlet callStatus = 'Not Booked';\nlet proposalStatus = 'Not Started';\nlet status = 'Manual Review';\nlet nextAction = row.next_action || '';\nlet routeReason = 'Needs human review before next step.';\n\nif (\n  finalScore >= 75 ||\n  finalCategory === 'Hot' ||\n  (strongBudget && urgentTimeline && hasAuthority && highPain)\n) {\n  route = 'discovery_call';\n  finalCategory = 'Hot';\n  status = 'Discovery Scheduled';\n  callStatus = 'Discovery Scheduled';\n  proposalStatus = 'Prepare Draft';\n  routeReason = 'High-intent lead with strong pain, urgency, authority, or budget.';\n  nextAction = 'Book discovery call and prepare ROI-based automation recommendation.';\n} else if (\n  finalScore >= 45 ||\n  finalCategory === 'Warm' ||\n  (flexibleTimeline && highPain) ||\n  (strongBudget && lowAuthority)\n) {\n  route = 'manual_review';\n  finalCategory = 'Warm';\n  status = 'Manual Review';\n  callStatus = 'Manual Review Needed';\n  proposalStatus = 'Wait for Qualification';\n  routeReason = 'Potential fit, but needs more clarity on scope, budget, authority, or timeline.';\n  nextAction = 'Send qualification questions and review manually.';\n} else {\n  route = 'nurture';\n  finalCategory = 'Cold';\n  status = 'Nurture';\n  callStatus = 'Not Required';\n  proposalStatus = 'Not Required';\n  routeReason = 'Low urgency, weak budget, unclear ROI, or early exploration stage.';\n  nextAction = 'Send helpful nurture email and follow up later.';\n}\n\nlet email_subject = '';\nlet email_body = '';\n\nif (route === 'discovery_call') {\n  email_subject = `AKcelerateHQ Discovery Call - ${companyName}`;\n  email_body = `Hi ${fullName},<br><br>Thanks for submitting your AKcelerateHQ Automation Audit request.<br><br>Based on your answers, your business looks like a strong fit for automation, especially around:<br><b>${recommendedOffer}</b><br><br>We have scheduled a discovery call to understand your workflow, current tools, and ROI opportunity.<br><br><b>Call Time:</b> {{DISCOVERY_TIME}}<br><b>Google Meet:</b> {{GOOGLE_MEET_LINK}}<br><br>Please keep these ready before the call:<br>1. Your current workflow/process<br>2. Tools you currently use<br>3. Where your team loses the most time<br>4. Any sample Sheet, SOP, report, or CRM export if available<br><br>Regards,<br>AKcelerateHQ`;\n}\n\nif (route === 'manual_review') {\n  email_subject = `A few questions about your automation audit - ${companyName}`;\n  email_body = `Hi ${fullName},<br><br>Thanks for submitting your AKcelerateHQ Automation Audit request.<br><br>Your use case has automation potential, but we need a little more clarity before recommending the right system.<br><br>From your form, the best starting point looks like:<br><b>${recommendedOffer}</b><br><br>Please reply with answers to these 3 questions:<br>1. Which task is repeated daily or weekly by your team?<br>2. Which tool contains the main data today — Google Sheets, CRM, Excel, WhatsApp, email, or something else?<br>3. If this workflow is automated, what result matters most — time saved, faster response, fewer errors, or more sales?<br><br>After that, we can suggest the most practical next step.<br><br>Regards,<br>AKcelerateHQ`;\n}\n\nif (route === 'nurture') {\n  email_subject = `Your AKcelerateHQ Automation Audit request`;\n  email_body = `Hi ${fullName},<br><br>Thanks for submitting your AKcelerateHQ Automation Audit request.<br><br>At this stage, it looks like you may still be exploring automation options. That is completely fine.<br><br>A good first step is to identify one simple workflow that is repetitive, measurable, and easy to test — for example:<br>- lead follow-up<br>- reporting<br>- customer reply drafting<br>- data entry<br>- document processing<br><br>When you are ready, we can help you choose one workflow and build a small automation demo before scaling further.<br><br>Regards,<br>AKcelerateHQ`;\n}\n\nconst discovery = getTomorrow11AMIST();\n\nreturn {\n  json: {\n    ...row,\n    full_name: fullName,\n    company_name: companyName,\n    work_email: workEmail,\n    contact_no: contactNo,\n    route,\n    workflow_type,\n    audit_score: finalScore,\n    lead_category: finalCategory,\n    recommended_offer: recommendedOffer,\n    priority_reason: row.priority_reason || routeReason,\n    route_reason: routeReason,\n    next_action: nextAction,\n    email_subject,\n    email_body,\n    discovery_start: discovery.start,\n    discovery_end: discovery.end,\n    discovery_time: discovery.start,\n    status,\n    processed: true,\n    assigned_owner: row.assigned_owner || 'Kalpesh',\n    call_status: callStatus,\n    proposal_status: proposalStatus,\n    n8n_sent: true,\n    n8n_response: `Routed as ${route} using score + form selections`,\n    notes: `${row.notes || ''} | Route: ${route} | Workflow type: ${workflow_type} | Reason: ${routeReason}`,\n    updated_at: new Date().toISOString()\n  }\n};"
+      },
+      "id": "50593ace-3af5-4962-b2b7-3e81e39272b4",
+      "name": "Decide Route From Score + Form Selection",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1232,
+        784
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{$json.route}}",
+                    "rightValue": "discovery_call",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{$json.route}}",
+                    "rightValue": "manual_review",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{$json.route}}",
+                    "rightValue": "nurture",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "36fde811-fc96-49d0-9bef-20b04235e738",
+      "name": "Route Switch",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        1472,
+        784
+      ]
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "primary",
+          "mode": "list"
+        },
+        "start": "={{$json.discovery_start}}",
+        "end": "={{$json.discovery_end}}",
+        "additionalFields": {
+          "attendees": [
+            "={{$json.work_email}}"
+          ],
+          "conferenceDataUi": {
+            "conferenceDataValues": {
+              "conferenceSolution": "hangoutsMeet"
+            }
+          },
+          "description": "=Lead: {{$json.full_name}}\nCompany: {{$json.company_name}}\nEmail: {{$json.work_email}}\nPhone: {{$json.contact_no}}\nIndustry: {{$json.Industry || $json.industry}}\nAudit Score: {{$json.audit_score}}\nCategory: {{$json.lead_category}}\nWorkflow Type: {{$json.workflow_type}}\nRecommended Offer: {{$json.recommended_offer}}\nReason: {{$json.route_reason}}\nNext Action: {{$json.next_action}}",
+          "summary": "=AKcelerateHQ Discovery Call - {{$json.company_name}}"
+        }
+      },
+      "id": "7bb98b5e-e2d6-422a-aa5c-25c694c87966",
+      "name": "Create Discovery Call Event",
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.2,
+      "position": [
+        1760,
+        544
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const lead = $('Decide Route From Score + Form Selection').item.json;\nconst event = $json;\n\nlet meetLink = event.hangoutLink || '';\n\nif (!meetLink && event.conferenceData && Array.isArray(event.conferenceData.entryPoints)) {\n  const videoEntry = event.conferenceData.entryPoints.find(entry => entry.entryPointType === 'video');\n  if (videoEntry && videoEntry.uri) meetLink = videoEntry.uri;\n}\n\nreturn {\n  json: {\n    ...lead,\n    calendar_event_id: event.id || '',\n    calendar_event_link: event.htmlLink || '',\n    google_meet_link: meetLink || 'Google Meet link will appear in the calendar invite.',\n    status: 'Discovery Scheduled',\n    processed: true,\n    call_status: 'Discovery Scheduled',\n    proposal_status: 'Prepare Draft',\n    updated_at: new Date().toISOString()\n  }\n};"
+      },
+      "id": "e1291d9c-efc2-4be8-a2f6-a09a1814a7d1",
+      "name": "Prepare Discovery Invite + Meet Link",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2016,
+        544
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{$json.work_email}}",
+        "subject": "={{$json.email_subject}}",
+        "message": "={{$json.email_body.replace('{{DISCOVERY_TIME}}', $json.discovery_start).replace('{{GOOGLE_MEET_LINK}}', $json.google_meet_link)}}",
+        "options": {}
+      },
+      "id": "640cc643-a524-404b-a897-77ffa7412885",
+      "name": "Send Hot Lead Discovery Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        2272,
+        544
+      ],
+      "webhookId": "send-hot-lead-discovery-email"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://YOUR_WHATSAPP_PROVIDER_API/send",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_WHATSAPP_PROVIDER_TOKEN"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"to\": $json.contact_no,\n  \"message\": \"Hi \" + $json.full_name + \", your AKcelerateHQ discovery call is scheduled. Time: \" + $json.discovery_start + \". Meet: \" + $json.google_meet_link\n}",
+        "options": {}
+      },
+      "id": "cce506e1-071f-40cc-8be2-4aacc7717519",
+      "name": "Optional WhatsApp - Hot Lead",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2528,
+        400
+      ],
+      "disabled": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Audit Leads",
+          "mode": "name",
+          "cachedResultName": "Audit Leads"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "row_number": "={{$json.row_number}}",
+            "processed": "TRUE",
+            "status": "Discovery Scheduled",
+            "audit_score": "={{$json.audit_score}}",
+            "lead_category": "={{$json.lead_category}}",
+            "priority_reason": "={{$json.priority_reason}}",
+            "recommended_offer": "={{$json.recommended_offer}}",
+            "next_action": "={{$json.next_action}}",
+            "assigned_owner": "={{$json.assigned_owner}}",
+            "call_status": "Discovery Scheduled",
+            "proposal_status": "Prepare Draft",
+            "n8n_sent": "TRUE",
+            "n8n_response": "={{$json.n8n_response}}",
+            "notes": "={{$json.notes}}",
+            "updated_at": "={{$json.updated_at}}"
+          },
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "2f6d8b18-58c8-4dd2-98a2-c143fc1a446e",
+      "name": "Update Status - Discovery Scheduled",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        2528,
+        544
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "YOUR_OWNER_EMAIL",
+        "subject": "=Manual Review Needed - {{$json.company_name}} - Score {{$json.audit_score}}",
+        "message": "=Hi Kalpesh,<br><br>This audit lead needs manual review.<br><br><b>Name:</b> {{$json.full_name}}<br><b>Company:</b> {{$json.company_name}}<br><b>Email:</b> {{$json.work_email}}<br><b>Phone:</b> {{$json.contact_no}}<br><b>Score:</b> {{$json.audit_score}}<br><b>Category:</b> {{$json.lead_category}}<br><b>Workflow Type:</b> {{$json.workflow_type}}<br><b>Recommended Offer:</b> {{$json.recommended_offer}}<br><b>Route Reason:</b> {{$json.route_reason}}<br><br><b>Next Action:</b><br>{{$json.next_action}}<br><br>Regards,<br>AKcelerateHQ System",
+        "options": {}
+      },
+      "id": "cdf983fa-2299-45eb-bda3-0fcc175da578",
+      "name": "Send Owner Manual Review Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1760,
+        784
+      ],
+      "webhookId": "send-owner-manual-review-email"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{$json.work_email}}",
+        "subject": "={{$json.email_subject}}",
+        "message": "={{$json.email_body}}",
+        "options": {}
+      },
+      "id": "21f6d678-f15b-40f9-b6b0-6b65aaddbb4c",
+      "name": "Send Warm Lead Qualification Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        2016,
+        784
+      ],
+      "webhookId": "send-warm-lead-qualification-email"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Audit Leads",
+          "mode": "name",
+          "cachedResultName": "Audit Leads"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "row_number": "={{$json.row_number}}",
+            "processed": "TRUE",
+            "status": "Manual Review",
+            "audit_score": "={{$json.audit_score}}",
+            "lead_category": "={{$json.lead_category}}",
+            "priority_reason": "={{$json.priority_reason}}",
+            "recommended_offer": "={{$json.recommended_offer}}",
+            "next_action": "={{$json.next_action}}",
+            "assigned_owner": "={{$json.assigned_owner}}",
+            "call_status": "Manual Review Needed",
+            "proposal_status": "Wait for Qualification",
+            "n8n_sent": "TRUE",
+            "n8n_response": "={{$json.n8n_response}}",
+            "notes": "={{$json.notes}}",
+            "updated_at": "={{$json.updated_at}}"
+          },
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "130136b0-407f-464d-9b82-a2ea2d50a7c0",
+      "name": "Update Status - Manual Review",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        2272,
+        784
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{$json.work_email}}",
+        "subject": "={{$json.email_subject}}",
+        "message": "={{$json.email_body}}",
+        "options": {}
+      },
+      "id": "92e6f905-622d-442f-9507-efdc8e92261e",
+      "name": "Send Cold Lead Nurture Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1760,
+        1024
+      ],
+      "webhookId": "send-cold-lead-nurture-email"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Audit Leads",
+          "mode": "name",
+          "cachedResultName": "Audit Leads"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "row_number": "={{$json.row_number}}",
+            "processed": "TRUE",
+            "status": "Nurture",
+            "audit_score": "={{$json.audit_score}}",
+            "lead_category": "={{$json.lead_category}}",
+            "priority_reason": "={{$json.priority_reason}}",
+            "recommended_offer": "={{$json.recommended_offer}}",
+            "next_action": "={{$json.next_action}}",
+            "assigned_owner": "={{$json.assigned_owner}}",
+            "call_status": "Not Required",
+            "proposal_status": "Not Required",
+            "n8n_sent": "TRUE",
+            "n8n_response": "={{$json.n8n_response}}",
+            "notes": "={{$json.notes}}",
+            "updated_at": "={{$json.updated_at}}"
+          },
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Email address",
+              "displayName": "Email address",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Full name",
+              "displayName": "Full name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Work email",
+              "displayName": "Work email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Contact No",
+              "displayName": "Contact No",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Your Role in Business",
+              "displayName": "Your Role in Business",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Company name",
+              "displayName": "Company name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Website(Optional)",
+              "displayName": "Website(Optional)",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Industry",
+              "displayName": "Industry",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Company size",
+              "displayName": "Company size",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Monthly revenue",
+              "displayName": "Monthly revenue",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Country",
+              "displayName": "Country",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Tools you currently use",
+              "displayName": "Tools you currently use",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "How does your operation run today? (Describe your team, processes, and handoffs..)",
+              "displayName": "How does your operation run today? (Describe your team, processes, and handoffs..)",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Where is the biggest pain? (pick all that apply)",
+              "displayName": "Where is the biggest pain? (pick all that apply)",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Estimated hours lost per week to manual work",
+              "displayName": "Estimated hours lost per week to manual work",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Your team's AI experience",
+              "displayName": "Your team's AI experience",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Existing automations (Zapier, scripts, etc.)",
+              "displayName": "Existing automations (Zapier, scripts, etc.)",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Data readiness",
+              "displayName": "Data readiness",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Which workflows would you like AI to handle?\n\n(Be specific — e.g., 'classify inbound emails, draft replies, sync to CRM')",
+              "displayName": "Which workflows would you like AI to handle?\n\n(Be specific — e.g., 'classify inbound emails, draft replies, sync to CRM')",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Desired outcomes",
+              "displayName": "Desired outcomes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Timeline",
+              "displayName": "Timeline",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Budget",
+              "displayName": "Budget",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Decision authority",
+              "displayName": "Decision authority",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Anything else we should know?  (Constraints, integrations, security needs...)",
+              "displayName": "Anything else we should know?  (Constraints, integrations, security needs...)",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "How did you hear about us?  (Mention your referral in others)",
+              "displayName": "How did you hear about us?  (Mention your referral in others)",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Upload any helpful files such as workflow screenshots, Excel sheets, SOPs, reports, CRM exports, invoice samples, lead sheets, process documents, or project requirements.",
+              "displayName": "Upload any helpful files such as workflow screenshots, Excel sheets, SOPs, reports, CRM exports, invoice samples, lead sheets, process documents, or project requirements.",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "I agree that AKcelerateHQ may contact me regarding my automation audit request.",
+              "displayName": "I agree that AKcelerateHQ may contact me regarding my automation audit request.",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "processed",
+              "displayName": "processed",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "audit_score",
+              "displayName": "audit_score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "lead_category",
+              "displayName": "lead_category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "priority_reason",
+              "displayName": "priority_reason",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "recommended_offer",
+              "displayName": "recommended_offer",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "next_action",
+              "displayName": "next_action",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "assigned_owner",
+              "displayName": "assigned_owner",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "call_status",
+              "displayName": "call_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "proposal_status",
+              "displayName": "proposal_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "n8n_sent",
+              "displayName": "n8n_sent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "n8n_response",
+              "displayName": "n8n_response",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "notes",
+              "displayName": "notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "updated_at",
+              "displayName": "updated_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "98102a21-b35a-4ffa-b6fa-94a805f5ebc4",
+      "name": "Update Status - Nurture",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        2016,
+        1024
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Sheets Trigger": {
+      "main": [
+        [
+          {
+            "node": "Read Audit Leads Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Audit Leads Sheet": {
+      "main": [
+        [
+          {
+            "node": "Clean + Filter + Normalize WhatsApp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clean + Filter + Normalize WhatsApp": {
+      "main": [
+        [
+          {
+            "node": "Audit Lead Loop",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Audit Lead Loop": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Build AI Audit Score Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build AI Audit Score Prompt": {
+      "main": [
+        [
+          {
+            "node": "AI Agent - Score Audit Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent - Score Audit Lead": {
+      "main": [
+        [
+          {
+            "node": "Parse AI Audit Score",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent - Score Audit Lead",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent - Score Audit Lead",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse AI Audit Score": {
+      "main": [
+        [
+          {
+            "node": "Update Sheet - AI Scored",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Sheet - AI Scored": {
+      "main": [
+        [
+          {
+            "node": "Send Confirmation Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Confirmation Email": {
+      "main": [
+        [
+          {
+            "node": "Optional WhatsApp Confirmation - Configure Provider",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Optional WhatsApp Confirmation - Configure Provider": {
+      "main": [
+        [
+          {
+            "node": "Audit Lead Loop",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule - Smart Routing": {
+      "main": [
+        [
+          {
+            "node": "Read Scored Audit Leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Scored Audit Leads": {
+      "main": [
+        [
+          {
+            "node": "Filter Scored Leads Pending Routing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Scored Leads Pending Routing": {
+      "main": [
+        [
+          {
+            "node": "Audit Lead Routing Loop",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Audit Lead Routing Loop": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Decide Route From Score + Form Selection",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Decide Route From Score + Form Selection": {
+      "main": [
+        [
+          {
+            "node": "Route Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route Switch": {
+      "main": [
+        [
+          {
+            "node": "Create Discovery Call Event",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send Owner Manual Review Email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send Cold Lead Nurture Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Discovery Call Event": {
+      "main": [
+        [
+          {
+            "node": "Prepare Discovery Invite + Meet Link",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Discovery Invite + Meet Link": {
+      "main": [
+        [
+          {
+            "node": "Send Hot Lead Discovery Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Hot Lead Discovery Email": {
+      "main": [
+        [
+          {
+            "node": "Optional WhatsApp - Hot Lead",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Update Status - Discovery Scheduled",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Status - Discovery Scheduled": {
+      "main": [
+        [
+          {
+            "node": "Audit Lead Routing Loop",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Owner Manual Review Email": {
+      "main": [
+        [
+          {
+            "node": "Send Warm Lead Qualification Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Warm Lead Qualification Email": {
+      "main": [
+        [
+          {
+            "node": "Update Status - Manual Review",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Status - Manual Review": {
+      "main": [
+        [
+          {
+            "node": "Audit Lead Routing Loop",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Cold Lead Nurture Email": {
+      "main": [
+        [
+          {
+            "node": "Update Status - Nurture",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Status - Nurture": {
+      "main": [
+        [
+          {
+            "node": "Audit Lead Routing Loop",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "nodeGroups": [],
+  "tags": []
+}

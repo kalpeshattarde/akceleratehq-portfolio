@@ -11,6 +11,8 @@ build/
 *.tmp
 .DS_Store
 Thumbs.db
+__pycache__/
+.pytest_cache/
 
 # Local n8n/runtime files
 .n8n/
