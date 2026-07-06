@@ -6,6 +6,8 @@
 - Required fields are checked before AI scoring.
 - Consent is checked when the source row includes a consent field.
 - WhatsApp numbers are normalized before optional message sends.
+- The manual trigger provides a safe path for reviewer/demo execution.
+- The `Edit Fields` node aligns parsed AI output with the Google Sheet update schema.
 - The AI Agent uses a Structured Output Parser so downstream nodes receive predictable JSON.
 - Score parsing includes fallback handling when the model response is wrapped as text.
 - Lead routes are constrained to `discovery_call`, `manual_review`, and `nurture`.
@@ -27,7 +29,7 @@ For a live deployment, add:
 
 - n8n global error workflow that captures workflow name, node name, execution URL, row number, and error message.
 - `Workflow Errors` sheet tab for dead-letter logging.
-- Retry/backoff on Gmail, Calendar, OpenAI, and HTTP Request nodes.
+- Retry/backoff on Gmail, Calendar, OpenRouter, and HTTP Request nodes.
 - Idempotency key based on sheet row number plus work email.
 - Owner alert when scoring succeeds but sheet update fails.
 - Owner alert when Calendar event creation succeeds but the email send fails.

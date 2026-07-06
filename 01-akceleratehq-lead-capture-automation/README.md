@@ -1,8 +1,12 @@
 # Project 01 - AKcelerateHQ Lead Capture Automation
 
-Portfolio case study for an n8n automation that turns automation-audit form responses into scored, routed sales follow-up. The workflow reads new rows from an `Audit Leads` Google Sheet, normalizes contact data, uses an AI agent with structured output for audit scoring, writes the result back to the sheet, sends confirmation email, and routes leads through discovery, manual review, or nurture paths.
+Portfolio case study for an n8n automation that turns automation-audit form responses into scored, routed sales follow-up. The workflow reads new rows from an `Audit Leads` Google Sheet, normalizes contact data, uses an AI agent with structured output and OpenRouter for audit scoring, writes the result back to the sheet, sends confirmation email, and routes leads through discovery, manual review, or nurture paths.
 
-![Workflow map](assets/workflow-map.svg)
+![Workflow screenshot](assets/workflow-preview.png)
+
+## Demo Video
+
+[Watch the Loom demo](https://www.loom.com/share/7a2b5bc245ad4109b7e8fc2a329a2079)
 
 ## Business Outcome
 
@@ -11,10 +15,12 @@ The project replaces manual lead review with a repeatable intake and routing sys
 ## What The Workflow Does
 
 - Captures new Google Sheet rows from the AKcelerateHQ automation-audit intake.
+- Includes a manual trigger for safe reviewer/test execution without waiting for a new sheet row.
 - Filters already-processed rows and submissions missing required name, email, or company fields.
 - Normalizes WhatsApp/phone values and maps inconsistent form headers into stable internal fields.
+- Uses an `Edit Fields` step to align normalized fields with the sheet update schema.
 - Builds an AI audit-scoring prompt from business pain, tools, budget, timeline, authority, and data readiness.
-- Uses an n8n AI Agent, OpenAI Chat Model, and Structured Output Parser to return a controlled JSON score.
+- Uses an n8n AI Agent, OpenRouter Chat Model, and Structured Output Parser to return a controlled JSON score.
 - Updates the `Audit Leads` sheet with `audit_score`, `lead_category`, owner, status, next action, and notes.
 - Sends a confirmation email to the lead.
 - Runs a scheduled smart-routing pass every 30 minutes.
@@ -39,6 +45,7 @@ The project replaces manual lead review with a repeatable intake and routing sys
 |---|---|
 | `workflows/akceleratehq-lead-capture-automation.public.json` | Sanitized n8n workflow export for review/import |
 | `docs/setup-guide.md` | Import, credential, placeholder, and test steps |
+| `docs/demo-guide.md` | Loom demo link and reviewer walkthrough |
 | `docs/security-notes.md` | Public repo safety notes and credential handling |
 | `docs/business-case.md` | Business problem, value, and hiring-manager review notes |
 | `docs/field-map.md` | Input and output fields expected by the workflow |
@@ -47,7 +54,7 @@ The project replaces manual lead review with a repeatable intake and routing sys
 | `sample-data/audit-leads.sample.csv` | Realistic mock submissions for local review |
 | `scripts/simulate_lead_routing.py` | Offline scoring/routing simulation with no external APIs |
 | `output-samples/routed-leads.sample.csv` | Generated sample output from the offline simulation |
-| `assets/workflow-map.svg` | Project workflow map matching the public export |
+| `assets/workflow-preview.png` | Current n8n workflow screenshot matching the public export |
 
 ## Offline Validation
 
@@ -63,8 +70,8 @@ Or from this project folder:
 python scripts/simulate_lead_routing.py
 ```
 
-The script reads `sample-data/audit-leads.sample.csv`, applies deterministic scoring and routing rules modeled after the n8n workflow, and writes `output-samples/routed-leads.sample.csv`. It does not call Google, Gmail, Calendar, OpenAI, or WhatsApp APIs.
+The script reads `sample-data/audit-leads.sample.csv`, applies deterministic scoring and routing rules modeled after the n8n workflow, and writes `output-samples/routed-leads.sample.csv`. It does not call Google, Gmail, Calendar, OpenRouter, or WhatsApp APIs.
 
 ## Credential Status
 
-The workflow export is inactive and sanitized for public review. To run it in n8n, connect Google Sheets, Gmail, Google Calendar, and OpenAI credentials, replace placeholders documented in the setup guide, and only enable WhatsApp HTTP nodes after adding a provider token and consent controls.
+The workflow export is inactive and sanitized for public review. To run it in n8n, connect Google Sheets, Gmail, Google Calendar, and OpenRouter credentials, replace placeholders documented in the setup guide, and only enable WhatsApp HTTP nodes after adding a provider token and consent controls.

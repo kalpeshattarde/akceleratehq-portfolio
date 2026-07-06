@@ -2,6 +2,12 @@
 
 This guide explains how to run the AKcelerateHQ Lead Capture Automation after importing the public workflow export into n8n.
 
+## Demo Reference
+
+Loom walkthrough:
+
+https://www.loom.com/share/7a2b5bc245ad4109b7e8fc2a329a2079
+
 ## 1. Import Workflow
 
 Import this file into n8n:
@@ -69,7 +75,7 @@ Connect these credentials inside n8n:
 - Google Sheets OAuth credential for the `Audit Leads` sheet trigger, read, and update nodes.
 - Gmail OAuth credential for lead confirmation, discovery, qualification, nurture, and owner review emails.
 - Google Calendar OAuth credential for hot-lead discovery calls.
-- OpenAI credential for the AI Agent scoring path.
+- OpenRouter credential for the AI Agent scoring path.
 - Optional WhatsApp provider token for the disabled HTTP Request nodes.
 
 ## 4. Replace Placeholders
@@ -91,10 +97,11 @@ The public export intentionally removes n8n credential objects. After import, ch
 2. Execute the Google Sheets trigger path manually.
 3. Confirm the normalize node emits a row with stable fields such as `full_name`, `work_email`, `company_name`, and `contact_no`.
 4. Confirm the AI Agent returns structured JSON through the output parser.
-5. Confirm `Parse AI Audit Score` writes `audit_score`, `lead_category`, `recommended_offer`, and `next_action`.
-6. Confirm `Update Sheet - AI Scored` updates the same row.
-7. Run the scheduled routing path manually and verify the route is one of `discovery_call`, `manual_review`, or `nurture`.
-8. Keep WhatsApp nodes disabled until provider credentials, consent language, and opt-out handling are configured.
+5. Confirm `Parse AI Lead Score` writes `audit_score`, `lead_category`, `recommended_offer`, and `next_action`.
+6. Confirm `Edit Fields` maps the parsed output into the sheet update schema.
+7. Confirm `Update Sheet - AI Scored` updates the same row.
+8. Run the scheduled routing path manually and verify the route is one of `discovery_call`, `manual_review`, or `nurture`.
+9. Keep WhatsApp nodes disabled until provider credentials, consent language, and opt-out handling are configured.
 
 ## 6. Validate Offline Logic
 

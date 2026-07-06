@@ -8,7 +8,8 @@ This project is prepared for public portfolio review. The workflow export is a c
 - n8n credential IDs and credential names.
 - Live Google Sheet ID and cached Google Sheet URLs.
 - n8n instance ID and workflow version ID.
-- API keys, bearer tokens, and WhatsApp provider secrets.
+- OpenRouter API keys, bearer tokens, and WhatsApp provider secrets.
+- Private owner email addresses.
 - Real lead or customer data.
 
 ## Placeholder Values

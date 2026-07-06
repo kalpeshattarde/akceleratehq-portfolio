@@ -27,9 +27,13 @@ This n8n workflow turns the intake sheet into a lightweight AI-assisted CRM queu
 ## What This Proves For An AI Automation Engineer Role
 
 - Ability to design real business workflows instead of isolated demos.
-- Practical use of n8n triggers, Code nodes, AI Agent nodes, structured output parsing, Gmail, Google Sheets, and Google Calendar.
+- Practical use of n8n triggers, Code nodes, Set/Edit Fields nodes, AI Agent nodes, OpenRouter chat model configuration, structured output parsing, Gmail, Google Sheets, and Google Calendar.
 - Awareness of consent, credential safety, disabled optional channels, and human review paths.
 - Ability to provide mock data and offline validation so reviewers can inspect logic without API access.
+
+## Demo Asset
+
+Loom walkthrough: https://www.loom.com/share/7a2b5bc245ad4109b7e8fc2a329a2079
 
 ## Current Scope And Limits
 

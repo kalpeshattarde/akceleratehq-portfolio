@@ -1,7 +1,7 @@
 """Offline simulation for the AKcelerateHQ lead capture workflow.
 
 This mirrors the workflow's scoring and routing intent without calling n8n,
-Google, Gmail, Calendar, OpenAI, or a WhatsApp provider.
+Google, Gmail, Calendar, OpenRouter, or a WhatsApp provider.
 """
 
 from __future__ import annotations
