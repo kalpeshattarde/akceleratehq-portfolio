@@ -1,0 +1,10 @@
+{
+  "name": "Meera Iyer",
+  "exp": 5,
+  "easy": 15,
+  "medium": 20,
+  "hard": 34,
+  "total": 69,
+  "recommendation": "STRONG_HIRE",
+  "feedback": "Candidate gave practical workflow, RAG, error handling, idempotency, and local LLM answers. Validate claims against portfolio before final decision."
+}

@@ -1,0 +1,22 @@
+AI: Please state your name and years of experience.
+User: My name is Meera Iyer and I have five years of experience in AI automation.
+AI: What is n8n and when would you use it?
+User: n8n is a workflow automation platform. I use it to connect triggers, APIs, databases, and approval steps when a business process needs repeatable orchestration.
+AI: What is a webhook?
+User: A webhook is an HTTP callback that lets an external system trigger a workflow in real time.
+AI: How do you handle errors in production workflows?
+User: I add retries, error branches, execution logging, idempotency keys, and owner alerts for failures that need human action.
+AI: Explain RAG in practical terms.
+User: RAG retrieves relevant documents from a vector store and sends that context to an LLM so answers are grounded in private knowledge.
+AI: How would you secure OAuth credentials in n8n?
+User: I keep them in n8n credentials, restrict access by role, avoid exporting secrets, and rotate credentials if access changes.
+AI: How would you design an email classification agent?
+User: I would pull messages, classify intent and urgency, draft replies with source context, send high-risk cases for review, and log every decision.
+AI: What would you do if a workflow sends duplicate emails?
+User: I would add an idempotency key based on message id and recipient, check the log before sending, and make retries safe.
+AI: How do you measure business value from automation?
+User: I measure time saved, response SLA, error reduction, throughput, and revenue or cost impact before and after deployment.
+AI: When should a candidate or customer stay in a human review path?
+User: When confidence is low, the action is irreversible, compliance risk exists, or the data is incomplete.
+AI: How would you deploy a private local LLM workflow?
+User: I would run Ollama or LM Studio behind an internal service, connect it through an API, monitor latency, and keep sensitive documents inside the private network.

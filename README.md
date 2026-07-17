@@ -7,6 +7,7 @@ Project-centric portfolio of AI automation workflows built for business review. 
 | # | Project | Business value | Main tools | Demo |
 |---|---|---|---|---|
 | 01 | [AKcelerateHQ Lead Capture Automation](01-akceleratehq-lead-capture-automation/README.md) | Scores automation-audit leads, confirms receipt, and routes each lead to discovery, manual review, or nurture follow-up based on score and form context. | n8n, Google Sheets, Gmail, Google Calendar, OpenRouter, optional WhatsApp provider | [Loom demo](https://www.loom.com/share/7a2b5bc245ad4109b7e8fc2a329a2079) |
+| 02 | [AI Candidate Screening HR + ATS](02-ai-candidate-screening-hr-ats/README.md) | Screens AI automation applicants from a hiring sheet, scores resume fit, routes candidates to interview/manual review/HR approval, and evaluates AI interview transcripts. | n8n, Google Sheets, Google Drive, Gmail, Google Calendar, OpenRouter, OpenAI, optional WhatsApp provider | [Workflow screenshot](02-ai-candidate-screening-hr-ats/assets/workflow-preview.png) |
 
 ## Repository Standard
 

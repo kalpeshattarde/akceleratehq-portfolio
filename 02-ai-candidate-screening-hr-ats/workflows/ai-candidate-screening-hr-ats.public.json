@@ -1,0 +1,3310 @@
+{
+  "name": "AI Candidate Screening HR + ATS - Public Export",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## AI Automation Hiring Demo\nUpdated for AI Automation Engineer / n8n Automation Developer hiring posts.\n\nCaptures WhatsApp number, portfolio, GitHub, n8n/RAG/Ollama/CRM skills, resume link, and one end-to-end automation note.\n\nMain flow:\nGoogle Form -> Applications Sheet -> n8n -> Resume PDF extraction -> OpenRouter scoring -> Email/WhatsApp confirmation -> Smart routing.",
+        "height": 260,
+        "width": 520
+      },
+      "id": "583ddea9-ab06-40ac-8e66-1022d01000c1",
+      "name": "Project Notes",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1168,
+        -592
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Configure before running\n1. Replace YOUR_HIRING_GOOGLE_SHEET_ID and YOUR_INTERVIEW_EVALUATION_SHEET_ID.\n2. Add credentials for Google Sheets, Google Drive, Gmail, Google Calendar, OpenRouter, and OpenAI.\n3. Replace YOUR_HR_EMAIL.\n4. Optional WhatsApp nodes are disabled. Configure your provider URL/token, then enable.\n5. Sheet tab must be Applications.\n\nSuggested WhatsApp providers: AiSensy, Interakt, Gallabox, WATI, WAHA, Twilio WhatsApp, or Meta Cloud API.\n\nGoogle Meet enabled: the interview calendar event generates a Meet link, emails it to the candidate, sends it via optional WhatsApp, and saves it in the Applications notes column.",
+        "height": 300,
+        "width": 520
+      },
+      "id": "c17a6210-af5b-435f-8e1d-0f7c07843b1a",
+      "name": "Config Notes",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1184,
+        -64
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 10
+            }
+          ]
+        }
+      },
+      "id": "d946964b-2618-40ad-8c34-4781b6ec2ce1",
+      "name": "Schedule - Resume Ingestion",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -496,
+        -576
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_HIRING_GOOGLE_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Applications",
+          "mode": "name",
+          "cachedResultName": "Applications"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "processed",
+              "lookupValue": "false"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "7f8a1776-9b35-40a8-9f83-ea17c3f7e9d8",
+      "name": "Read Applications Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -272,
+        -576
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "function get(row, keys) {\n  for (const key of keys) {\n    if (row[key] !== undefined && row[key] !== null && String(row[key]).trim() !== '') {\n      return row[key];\n    }\n  }\n  return '';\n}\n\nfunction normalizeWhatsApp(input) {\n  if (!input) return '';\n\n  let v = String(input).replace(/[^0-9+]/g, '');\n\n  if (v.startsWith('+')) return v;\n  if (v.length === 10) return '+91' + v;\n  if (v.startsWith('91') && v.length === 12) return '+' + v;\n\n  return v;\n}\n\nconst output = [];\n\nfor (const item of $input.all()) {\n  const row = item.json;\n\n  const status = String(get(row, ['status', 'Status'])).toLowerCase().trim();\n  const processed = String(get(row, ['processed', 'Processed'])).toLowerCase().trim();\n\n  const alreadyDone =\n    processed === 'true' ||\n    processed === 'yes' ||\n    [\n      'scored',\n      'interview scheduled',\n      'manual review',\n      'rejection pending hr approval',\n      'rejected',\n      'hired',\n      'on hold'\n    ].includes(status);\n\n  if (alreadyDone) continue;\n\n  const fullName = get(row, ['full_name', 'Full Name']);\n  const email = get(row, ['email', 'Email Address', 'Email']);\n  const rawWhatsapp = get(row, [\n    'whatsapp_number',\n    'WhatsApp Number',\n    'phone',\n    'Phone Number'\n  ]);\n\n  const resumeLink = get(row, [\n    'resume_link',\n    'Resume Google Drive PDF Link'\n  ]);\n\n  const whatsapp = normalizeWhatsApp(rawWhatsapp);\n\n  if (!fullName || !email || !whatsapp || !resumeLink) {\n    continue;\n  }\n\n  output.push({\n    json: {\n      timestamp: get(row, ['timestamp', 'Timestamp']),\n      full_name: fullName,\n      email,\n      whatsapp_number: whatsapp,\n      phone: get(row, ['phone', 'Phone Number']),\n      city_state: get(row, ['city_state', 'City / State']),\n      linkedin_url: get(row, ['linkedin_url', 'LinkedIn Profile URL']),\n      portfolio_url: get(row, ['portfolio_url', 'Portfolio / Demo URL']),\n      github_url: get(row, ['github_url', 'GitHub URL']),\n      resume_link: resumeLink,\n      job_role: get(row, ['job_role', 'Role Applying For']) || 'AI Automation Engineer',\n      experience_years: get(row, ['experience_years', 'Years of Experience']),\n      notice_period: get(row, ['notice_period', 'Notice Period']),\n      expected_salary_or_charges: get(row, [\n        'expected_salary_or_charges',\n        'Expected Salary / Project Charges'\n      ]),\n      employment_type: get(row, ['employment_type', 'Employment Type']),\n      skills_checklist: get(row, ['skills_checklist', 'Skills Checklist']),\n      has_n8n_production: get(row, [\n        'has_n8n_production',\n        'Have you built n8n workflows in production?'\n      ]),\n      has_local_llm_rag: get(row, [\n        'has_local_llm_rag',\n        'Have you deployed local LLM or RAG system?'\n      ]),\n      automation_built_end_to_end: get(row, [\n        'automation_built_end_to_end',\n        'Describe one automation you built end to end'\n      ]),\n      automation_outcome: get(row, [\n        'automation_outcome',\n        'What business outcome did it create?'\n      ]),\n      client_industries: get(row, [\n        'client_industries',\n        'Industries you have automated'\n      ]),\n      comfortable_presenting_to_founder_md: get(row, [\n        'comfortable_presenting_to_founder_md',\n        'Can you present automation outcomes to a founder / MD?'\n      ]),\n      whatsapp_opt_in: get(row, [\n        'whatsapp_opt_in',\n        'I agree to receive updates on WhatsApp'\n      ]),\n      source_post: get(row, ['source_post', 'Source Post']),\n      status: 'New',\n      processed: false\n    }\n  });\n}\n\nreturn output;"
+      },
+      "id": "2db7484f-0d03-4069-a1be-d5015b48353d",
+      "name": "Clean + Filter + Normalize WhatsApp",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        -576
+      ]
+    },
+    {
+      "parameters": {
+        "options": {
+          "reset": false
+        }
+      },
+      "id": "30e75169-6b47-42aa-b105-f9718537a336",
+      "name": "Resume Loop",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        256,
+        -576
+      ],
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "mode": "url",
+          "value": "={{ $json.resume_link }}",
+          "__regex": "https:\\/\\/(?:drive|docs)\\.google\\.com(?:\\/.*|)\\/d\\/([0-9a-zA-Z\\-_]+)(?:\\/.*|)"
+        },
+        "options": {
+          "binaryPropertyName": "data"
+        }
+      },
+      "id": "64245816-07b6-4887-b93c-ea3a074a98c2",
+      "name": "Download Resume PDF",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        736,
+        -576
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "binaryPropertyName": "=data",
+        "options": {}
+      },
+      "id": "4c20c5d3-ef02-4d0f-9c39-706afba9538b",
+      "name": "Extract Resume Text",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        992,
+        -576
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "let base = {};\n\ntry {\n  base = $('Resume Loop').item.json;\n} catch (error) {\n  base = {};\n}\n\nconst resumeText =\n  $json.text ||\n  $json.data ||\n  $json.content ||\n  $json.extractedText ||\n  Object.values($json).join('\\n');\n\nconst hiringContext = `\nHiring context:\nThe roles are AI Automation Engineer / n8n Automation Developer / AI Automation Expert / Automation Workflow Lead.\n\nImportant skills:\n- n8n production workflows, Make, Zapier\n- AI agents, email classification, reply drafting, sales pipeline automation\n- Private RAG knowledge vault, vector DBs, Ollama / LM Studio\n- Python or Node.js, JavaScript, REST APIs, webhooks, OAuth, JSON\n- Gmail API / Microsoft Graph\n- CRM systems: Bitrix24, Zoho, HubSpot or similar\n- Finance workflows: invoicing, reminders, reporting\n- Marketing outreach sequences and campaign tracking\n- WhatsApp automation and CRM lead management\n- Docker, deployment, local infrastructure\n- Ability to present outcomes to founder / MD\n`;\n\nconst prompt = `\nYou are an expert technical recruiter for AI automation roles.\n\n${hiringContext}\n\nCandidate form details:\nName: ${base.full_name}\nEmail: ${base.email}\nWhatsApp: ${base.whatsapp_number}\nRole applying for: ${base.job_role}\nExperience years: ${base.experience_years}\nNotice period: ${base.notice_period}\nExpected salary or charges: ${base.expected_salary_or_charges}\nEmployment type: ${base.employment_type}\nSkills checklist: ${base.skills_checklist}\nn8n production experience: ${base.has_n8n_production}\nLocal LLM / RAG experience: ${base.has_local_llm_rag}\nEnd-to-end automation built: ${base.automation_built_end_to_end}\nBusiness outcome: ${base.automation_outcome}\nPortfolio: ${base.portfolio_url}\nGitHub: ${base.github_url}\nLinkedIn: ${base.linkedin_url}\n\nResume text:\n${resumeText}\n\nScore the candidate from 0 to 100 using this weighting:\n1. n8n / workflow automation production experience: 20\n2. AI agents + LLM automation: 15\n3. RAG + local LLM infrastructure: 15\n4. APIs, webhooks, OAuth, Gmail/MS Graph: 15\n5. CRM + sales/marketing/finance automation: 15\n6. Python/Node.js + Docker/deployment: 10\n7. Communication and founder-facing business outcome clarity: 10\n\nReturn only valid JSON. No markdown. No text outside JSON.\n\nRequired JSON format:\n{\n  \"score\": 90,\n  \"category\": \"Strong\",\n  \"summary\": \"Short candidate summary\",\n  \"strengths\": [\"strength 1\", \"strength 2\"],\n  \"weaknesses\": [\"weakness 1\", \"weakness 2\"],\n  \"recommended_action\": \"Interview\",\n  \"risk_flags\": [\"risk 1\", \"risk 2\"],\n  \"interview_questions\": [\"question 1\", \"question 2\"]\n}\n\nRules:\n- Strong = score 75 or above\n- Average = score 50 to 74\n- Weak = below 50\n- recommended_action must be Interview, Manual Review, or HR Approval Before Rejection\n- Do not judge age, gender, religion, caste, location, photo, or personal background.\n- Judge only skills, experience, projects, communication, and role fit.\n`;\n\nreturn {\n  json: {\n    ...base,\n    resume_text: resumeText,\n    ai_prompt: prompt\n  }\n};"
+      },
+      "id": "c97363f1-481f-4ead-9295-4915ad9e3450",
+      "name": "Build AI Hiring Score Prompt",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1248,
+        -576
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const base = $('Build AI Hiring Score Prompt').item.json;\n\nfunction parseAiOutput(input) {\n  if (!input) return {};\n\n  if (typeof input === 'object') return input;\n\n  if (typeof input === 'string') {\n    let text = input.trim();\n\n    text = text.replace(/^```json/i, '');\n    text = text.replace(/^```/i, '');\n    text = text.replace(/```$/i, '');\n    text = text.trim();\n\n    try {\n      return JSON.parse(text);\n    } catch (error) {\n      return {};\n    }\n  }\n\n  return {};\n}\n\nlet raw =\n  $json.response?.output ||\n  $json.output ||\n  $json.text ||\n  $json;\n\nconst parsed = parseAiOutput(raw);\n\nconst score = Number(parsed.score || 0);\n\nlet category = parsed.category;\n\nif (!['Strong', 'Average', 'Weak'].includes(category)) {\n  category = score >= 75 ? 'Strong' : score >= 50 ? 'Average' : 'Weak';\n}\n\nlet recommendedAction = parsed.recommended_action;\n\nif (!['Interview', 'Manual Review', 'HR Approval Before Rejection'].includes(recommendedAction)) {\n  recommendedAction =\n    category === 'Strong'\n      ? 'Interview'\n      : category === 'Average'\n      ? 'Manual Review'\n      : 'HR Approval Before Rejection';\n}\n\nreturn {\n  json: {\n    ...base,\n\n    ai_score: score,\n    ai_category: category,\n    ai_summary: parsed.summary || '',\n\n    strengths: Array.isArray(parsed.strengths)\n      ? parsed.strengths.join(', ')\n      : parsed.strengths || '',\n\n    weaknesses: Array.isArray(parsed.weaknesses)\n      ? parsed.weaknesses.join(', ')\n      : parsed.weaknesses || '',\n\n    recommended_action: recommendedAction,\n\n    risk_flags: Array.isArray(parsed.risk_flags)\n      ? parsed.risk_flags.join(', ')\n      : parsed.risk_flags || '',\n\n    interview_questions: Array.isArray(parsed.interview_questions)\n      ? parsed.interview_questions.join(' | ')\n      : parsed.interview_questions || '',\n\n    status: 'Scored',\n    processed: true,\n    updated_at: new Date().toISOString()\n  }\n};"
+      },
+      "id": "e7c830f7-0d65-4f9d-911f-f8ba1673ecc5",
+      "name": "Parse AI Hiring Score",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1776,
+        -576
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_HIRING_GOOGLE_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Applications",
+          "mode": "name",
+          "cachedResultName": "Applications"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [
+            "email"
+          ],
+          "schema": [
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "full_name",
+              "displayName": "full_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "whatsapp_number",
+              "displayName": "whatsapp_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "city_state",
+              "displayName": "city_state",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "linkedin_url",
+              "displayName": "linkedin_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "portfolio_url",
+              "displayName": "portfolio_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "github_url",
+              "displayName": "github_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "resume_link",
+              "displayName": "resume_link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "job_role",
+              "displayName": "job_role",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "experience_years",
+              "displayName": "experience_years",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "notice_period",
+              "displayName": "notice_period",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "expected_salary_or_charges",
+              "displayName": "expected_salary_or_charges",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "employment_type",
+              "displayName": "employment_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "skills_checklist",
+              "displayName": "skills_checklist",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "has_n8n_production",
+              "displayName": "has_n8n_production",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "has_local_llm_rag",
+              "displayName": "has_local_llm_rag",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "automation_built_end_to_end",
+              "displayName": "automation_built_end_to_end",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "automation_outcome",
+              "displayName": "automation_outcome",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "client_industries",
+              "displayName": "client_industries",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "comfortable_presenting_to_founder_md",
+              "displayName": "comfortable_presenting_to_founder_md",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "whatsapp_opt_in",
+              "displayName": "whatsapp_opt_in",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "source_post",
+              "displayName": "source_post",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "processed",
+              "displayName": "processed",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "ai_score",
+              "displayName": "ai_score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "ai_category",
+              "displayName": "ai_category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "ai_summary",
+              "displayName": "ai_summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "strengths",
+              "displayName": "strengths",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "weaknesses",
+              "displayName": "weaknesses",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "recommended_action",
+              "displayName": "recommended_action",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "interview_time",
+              "displayName": "interview_time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "assigned_reviewer",
+              "displayName": "assigned_reviewer",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "notes",
+              "displayName": "notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "updated_at",
+              "displayName": "updated_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "resume_text",
+              "displayName": "resume_text",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "ai_prompt",
+              "displayName": "ai_prompt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "risk_flags",
+              "displayName": "risk_flags",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "interview_questions",
+              "displayName": "interview_questions",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "calendar_event_id",
+              "displayName": "calendar_event_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "calendar_event_link",
+              "displayName": "calendar_event_link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "google_meet_link",
+              "displayName": "google_meet_link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "interview_start",
+              "displayName": "interview_start",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "interview_end",
+              "displayName": "interview_end",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "resume_file_id",
+              "displayName": "resume_file_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "43bc5c92-a4a0-4352-9055-c863d84f180f",
+      "name": "Update Sheet - AI Scored",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        2032,
+        -576
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://YOUR_WHATSAPP_PROVIDER_API/send",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_WHATSAPP_PROVIDER_TOKEN"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"to\": $json.whatsapp_number,\n  \"message\": \"Hi \" + $json.full_name + \", your application for \" + $json.job_role + \" has been received. We will update you soon. - Hiring Team\"\n}",
+        "options": {}
+      },
+      "id": "353f36bd-1c8b-4f09-a6fa-08647eb75c28",
+      "name": "Optional WhatsApp Confirmation - Configure Provider",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2576,
+        -576
+      ],
+      "disabled": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 30
+            }
+          ]
+        }
+      },
+      "id": "40e34f43-6e01-487c-8d15-10d1e4d6b53a",
+      "name": "Schedule - Smart Routing",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -512,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_HIRING_GOOGLE_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Applications",
+          "mode": "name",
+          "cachedResultName": "Applications"
+        },
+        "options": {}
+      },
+      "id": "345c4bff-f6b9-47ac-a50c-423eae6979ed",
+      "name": "Read Scored Candidates",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -272,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const output = [];\n\nfor (const item of $input.all()) {\n  const row = item.json;\n\n  const status = String(row.status || '').toLowerCase().trim();\n  const category = String(row.ai_category || '').trim();\n\n  const alreadyRoutedStatuses = [\n    'interview scheduled',\n    'manual review',\n    'rejection pending hr approval',\n    'rejected',\n    'hired',\n    'on hold'\n  ];\n\n  if (alreadyRoutedStatuses.includes(status)) {\n    continue;\n  }\n\n  if (status === 'scored' && ['Strong', 'Average', 'Weak'].includes(category)) {\n    output.push({ json: row });\n  }\n}\n\nreturn output;"
+      },
+      "id": "f84b862d-609a-41ca-acd5-98a8f3e2d2fb",
+      "name": "Filter Scored Candidates Pending Routing",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "options": {
+          "reset": "={{ false }}"
+        }
+      },
+      "id": "15d3ca61-1f75-4b60-8f85-84c090f8e929",
+      "name": "Candidate Routing Loop",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        288,
+        128
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "function normalizeWhatsApp(input) {\n  if (!input) return '';\n\n  let v = String(input).replace(/[^0-9+]/g, '');\n\n  if (v.startsWith('+')) return v;\n  if (v.length === 10) return '+91' + v;\n  if (v.startsWith('91') && v.length === 12) return '+' + v;\n\n  return v;\n}\n\nfunction getTomorrow11AMIST() {\n  const now = new Date();\n\n  const istNow = new Date(now.getTime() + 5.5 * 60 * 60 * 1000);\n\n  const year = istNow.getUTCFullYear();\n  const month = istNow.getUTCMonth();\n  const day = istNow.getUTCDate() + 1;\n\n  // 11:00 AM IST = 05:30 AM UTC\n  const startUtc = new Date(Date.UTC(year, month, day, 5, 30, 0));\n  const endUtc = new Date(startUtc.getTime() + 30 * 60 * 1000);\n\n  return {\n    start: startUtc.toISOString(),\n    end: endUtc.toISOString()\n  };\n}\n\nconst row = $json;\n\nconst score = Number(row.ai_score || 0);\nconst category = String(row.ai_category || '').trim();\nconst recommendedAction = String(row.recommended_action || '').trim();\n\nlet route = 'manual_review';\n\nif (recommendedAction === 'Interview' || category === 'Strong' || score >= 75) {\n  route = 'interview';\n} else if (recommendedAction === 'Manual Review' || category === 'Average' || score >= 50) {\n  route = 'manual_review';\n} else {\n  route = 'hr_rejection_approval';\n}\n\nconst interview = getTomorrow11AMIST();\n\nreturn {\n  json: {\n    ...row,\n    route,\n    whatsapp_number: normalizeWhatsApp(row.whatsapp_number || row.phone),\n    interview_start: interview.start,\n    interview_end: interview.end,\n    interview_time: interview.start,\n    updated_at: new Date().toISOString()\n  }\n};"
+      },
+      "id": "8053a071-e7dd-4dcc-9b34-d48fe76f0b1a",
+      "name": "Decide Interview / Manual / HR Approval",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        592,
+        128
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{$json.route}}",
+                    "rightValue": "interview",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{$json.route}}",
+                    "rightValue": "manual_review",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{$json.route}}",
+                    "rightValue": "hr_rejection_approval",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "f8febac7-58e2-47c1-b5ed-e701e02e72a3",
+      "name": "Route Switch",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        784,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "primary",
+          "mode": "list"
+        },
+        "start": "={{$json.interview_start}}",
+        "end": "={{$json.interview_end}}",
+        "additionalFields": {
+          "attendees": [
+            "={{$json.email}}"
+          ],
+          "conferenceDataUi": {
+            "conferenceDataValues": {
+              "conferenceSolution": "hangoutsMeet"
+            }
+          },
+          "description": "=Candidate: {{$json.full_name}}\nEmail: {{$json.email}}\nWhatsApp: {{$json.whatsapp_number}}\nRole: {{$json.job_role}}\nAI Score: {{$json.ai_score}}\nAI Summary: {{$json.ai_summary}}\nPortfolio: {{$json.portfolio_url}}\nGitHub: {{$json.github_url}}\n\nGoogle Meet will be generated automatically for this event.",
+          "summary": "=Interview - {{$json.full_name}} - {{$json.job_role}}"
+        }
+      },
+      "id": "9c98cf20-eb98-4710-982c-f9bcbb7cdde4",
+      "name": "Create Interview Event",
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.2,
+      "position": [
+        1056,
+        -128
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{$json.email}}",
+        "subject": "=Interview Invitation with Google Meet - {{$json.job_role}}",
+        "message": "=Hi {{$json.full_name}},<br><br>Your profile has been shortlisted for the <b>{{$json.job_role}}</b> role.<br><br><b>Interview Time:</b> {{$json.interview_start}}<br><b>Google Meet Link:</b> <a href=\"{{$json.google_meet_link}}\">{{$json.google_meet_link}}</a><br><br>Please keep your portfolio/GitHub and one end-to-end automation demo ready.<br><br>Regards,<br>Hiring Team",
+        "options": {}
+      },
+      "id": "ab20dee0-265a-48e1-99a5-e306d56aad4c",
+      "name": "Send Interview Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1568,
+        -128
+      ],
+      "webhookId": "7766b89b-55e3-4be6-a268-5dbd8007939d"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://YOUR_WHATSAPP_PROVIDER_API/send",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_WHATSAPP_PROVIDER_TOKEN"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"to\": $json.whatsapp_number,\n  \"message\": \"Hi \" + $json.full_name + \", you are shortlisted for \" + $json.job_role + \". Interview time: \" + $json.interview_start + \". Google Meet: \" + $json.google_meet_link + \". Please keep your automation demo ready.\"\n}",
+        "options": {}
+      },
+      "id": "8d3ae43b-19e0-4ec9-9f1c-9c53ec921b49",
+      "name": "Optional WhatsApp Interview Invite - Configure Provider",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1824,
+        -128
+      ],
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_HIRING_GOOGLE_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Applications",
+          "mode": "name",
+          "cachedResultName": "Applications"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [
+            "email"
+          ],
+          "schema": [
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "full_name",
+              "displayName": "full_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "whatsapp_number",
+              "displayName": "whatsapp_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "city_state",
+              "displayName": "city_state",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "linkedin_url",
+              "displayName": "linkedin_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "portfolio_url",
+              "displayName": "portfolio_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "github_url",
+              "displayName": "github_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "resume_link",
+              "displayName": "resume_link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "job_role",
+              "displayName": "job_role",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "experience_years",
+              "displayName": "experience_years",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "notice_period",
+              "displayName": "notice_period",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "expected_salary_or_charges",
+              "displayName": "expected_salary_or_charges",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "employment_type",
+              "displayName": "employment_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "skills_checklist",
+              "displayName": "skills_checklist",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "has_n8n_production",
+              "displayName": "has_n8n_production",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "has_local_llm_rag",
+              "displayName": "has_local_llm_rag",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "automation_built_end_to_end",
+              "displayName": "automation_built_end_to_end",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "automation_outcome",
+              "displayName": "automation_outcome",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "client_industries",
+              "displayName": "client_industries",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "comfortable_presenting_to_founder_md",
+              "displayName": "comfortable_presenting_to_founder_md",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "whatsapp_opt_in",
+              "displayName": "whatsapp_opt_in",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "source_post",
+              "displayName": "source_post",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "processed",
+              "displayName": "processed",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "ai_score",
+              "displayName": "ai_score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "ai_category",
+              "displayName": "ai_category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "ai_summary",
+              "displayName": "ai_summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "strengths",
+              "displayName": "strengths",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "weaknesses",
+              "displayName": "weaknesses",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "recommended_action",
+              "displayName": "recommended_action",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "interview_time",
+              "displayName": "interview_time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "assigned_reviewer",
+              "displayName": "assigned_reviewer",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "notes",
+              "displayName": "notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "updated_at",
+              "displayName": "updated_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "resume_text",
+              "displayName": "resume_text",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "ai_prompt",
+              "displayName": "ai_prompt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "risk_flags",
+              "displayName": "risk_flags",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "interview_questions",
+              "displayName": "interview_questions",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "calendar_event_id",
+              "displayName": "calendar_event_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "calendar_event_link",
+              "displayName": "calendar_event_link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "google_meet_link",
+              "displayName": "google_meet_link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "interview_start",
+              "displayName": "interview_start",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "interview_end",
+              "displayName": "interview_end",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "resume_file_id",
+              "displayName": "resume_file_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "7fcf0c5f-51ff-4ba5-9ebd-e7243fa20b4d",
+      "name": "Update Status - Interview Scheduled",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        2080,
+        -128
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "YOUR_HR_EMAIL",
+        "subject": "=Manual Review Needed - {{$json.full_name}}",
+        "message": "=Hi Team,<br><br>This candidate needs manual review.<br><br><b>Name:</b> {{$json.full_name}}<br><b>Email:</b> {{$json.email}}<br><b>WhatsApp:</b> {{$json.whatsapp_number}}<br><b>Role:</b> {{$json.job_role}}<br><b>AI Score:</b> {{$json.ai_score}}<br><b>AI Category:</b> {{$json.ai_category}}<br><b>Summary:</b> {{$json.ai_summary}}<br><b>Strengths:</b> {{$json.strengths}}<br><b>Weaknesses:</b> {{$json.weaknesses}}<br><b>Portfolio:</b> {{$json.portfolio_url}}<br><b>GitHub:</b> {{$json.github_url}}<br><br>Regards,<br>Automation System",
+        "options": {}
+      },
+      "id": "4e2a1e33-a204-405c-8234-1e7d75e4393f",
+      "name": "Send HR Manual Review Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1056,
+        112
+      ],
+      "webhookId": "d3ae0ebe-5ab7-4de0-ae06-02419d7e34c5"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_HIRING_GOOGLE_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Applications",
+          "mode": "name",
+          "cachedResultName": "Applications"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [
+            "email"
+          ],
+          "schema": [
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "full_name",
+              "displayName": "full_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "whatsapp_number",
+              "displayName": "whatsapp_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "city_state",
+              "displayName": "city_state",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "linkedin_url",
+              "displayName": "linkedin_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "portfolio_url",
+              "displayName": "portfolio_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "github_url",
+              "displayName": "github_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "resume_link",
+              "displayName": "resume_link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "job_role",
+              "displayName": "job_role",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "experience_years",
+              "displayName": "experience_years",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "notice_period",
+              "displayName": "notice_period",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "expected_salary_or_charges",
+              "displayName": "expected_salary_or_charges",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "employment_type",
+              "displayName": "employment_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "skills_checklist",
+              "displayName": "skills_checklist",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "has_n8n_production",
+              "displayName": "has_n8n_production",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "has_local_llm_rag",
+              "displayName": "has_local_llm_rag",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "automation_built_end_to_end",
+              "displayName": "automation_built_end_to_end",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "automation_outcome",
+              "displayName": "automation_outcome",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "client_industries",
+              "displayName": "client_industries",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "comfortable_presenting_to_founder_md",
+              "displayName": "comfortable_presenting_to_founder_md",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "whatsapp_opt_in",
+              "displayName": "whatsapp_opt_in",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "source_post",
+              "displayName": "source_post",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "processed",
+              "displayName": "processed",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "ai_score",
+              "displayName": "ai_score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "ai_category",
+              "displayName": "ai_category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "ai_summary",
+              "displayName": "ai_summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "strengths",
+              "displayName": "strengths",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "weaknesses",
+              "displayName": "weaknesses",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "recommended_action",
+              "displayName": "recommended_action",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "interview_time",
+              "displayName": "interview_time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "assigned_reviewer",
+              "displayName": "assigned_reviewer",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "notes",
+              "displayName": "notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "updated_at",
+              "displayName": "updated_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "resume_text",
+              "displayName": "resume_text",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "ai_prompt",
+              "displayName": "ai_prompt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "risk_flags",
+              "displayName": "risk_flags",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "interview_questions",
+              "displayName": "interview_questions",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "calendar_event_id",
+              "displayName": "calendar_event_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "calendar_event_link",
+              "displayName": "calendar_event_link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "google_meet_link",
+              "displayName": "google_meet_link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "interview_start",
+              "displayName": "interview_start",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "interview_end",
+              "displayName": "interview_end",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "resume_file_id",
+              "displayName": "resume_file_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "5316ba38-ebe0-4994-b1d6-e86c06ecb154",
+      "name": "Update Status - Manual Review",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1328,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "YOUR_HR_EMAIL",
+        "subject": "=HR Approval Needed Before Rejection - {{$json.full_name}}",
+        "message": "=Hi Team,<br><br>This candidate was marked Weak by AI, but no automatic rejection has been sent.<br><br><b>Name:</b> {{$json.full_name}}<br><b>Email:</b> {{$json.email}}<br><b>WhatsApp:</b> {{$json.whatsapp_number}}<br><b>Role:</b> {{$json.job_role}}<br><b>AI Score:</b> {{$json.ai_score}}<br><b>Summary:</b> {{$json.ai_summary}}<br><b>Risk Flags:</b> {{$json.risk_flags}}<br><br>Please approve or override the decision manually.<br><br>Regards,<br>Automation System",
+        "options": {}
+      },
+      "id": "d28f2938-a70a-4575-9bfe-a6d167db1124",
+      "name": "Send HR Approval Before Rejection",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1056,
+        320
+      ],
+      "webhookId": "5b8f6a95-f2a1-4c82-983b-2a69a250947b"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_HIRING_GOOGLE_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Applications",
+          "mode": "name",
+          "cachedResultName": "Applications"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [
+            "email"
+          ],
+          "schema": [
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "full_name",
+              "displayName": "full_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "whatsapp_number",
+              "displayName": "whatsapp_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "city_state",
+              "displayName": "city_state",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "linkedin_url",
+              "displayName": "linkedin_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "portfolio_url",
+              "displayName": "portfolio_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "github_url",
+              "displayName": "github_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "resume_link",
+              "displayName": "resume_link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "job_role",
+              "displayName": "job_role",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "experience_years",
+              "displayName": "experience_years",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "notice_period",
+              "displayName": "notice_period",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "expected_salary_or_charges",
+              "displayName": "expected_salary_or_charges",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "employment_type",
+              "displayName": "employment_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "skills_checklist",
+              "displayName": "skills_checklist",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "has_n8n_production",
+              "displayName": "has_n8n_production",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "has_local_llm_rag",
+              "displayName": "has_local_llm_rag",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "automation_built_end_to_end",
+              "displayName": "automation_built_end_to_end",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "automation_outcome",
+              "displayName": "automation_outcome",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "client_industries",
+              "displayName": "client_industries",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "comfortable_presenting_to_founder_md",
+              "displayName": "comfortable_presenting_to_founder_md",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "whatsapp_opt_in",
+              "displayName": "whatsapp_opt_in",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "source_post",
+              "displayName": "source_post",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "processed",
+              "displayName": "processed",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "ai_score",
+              "displayName": "ai_score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "ai_category",
+              "displayName": "ai_category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "ai_summary",
+              "displayName": "ai_summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "strengths",
+              "displayName": "strengths",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "weaknesses",
+              "displayName": "weaknesses",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "recommended_action",
+              "displayName": "recommended_action",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "interview_time",
+              "displayName": "interview_time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "assigned_reviewer",
+              "displayName": "assigned_reviewer",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "notes",
+              "displayName": "notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "updated_at",
+              "displayName": "updated_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "resume_text",
+              "displayName": "resume_text",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "ai_prompt",
+              "displayName": "ai_prompt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "risk_flags",
+              "displayName": "risk_flags",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "interview_questions",
+              "displayName": "interview_questions",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "calendar_event_id",
+              "displayName": "calendar_event_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "calendar_event_link",
+              "displayName": "calendar_event_link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "google_meet_link",
+              "displayName": "google_meet_link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "interview_start",
+              "displayName": "interview_start",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "interview_end",
+              "displayName": "interview_end",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "resume_file_id",
+              "displayName": "resume_file_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "5465b38d-d3e7-4115-b6ba-c5e4a3e36438",
+      "name": "Update Status - Rejection Pending HR Approval",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1328,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const candidate = $('Decide Interview / Manual / HR Approval').item.json;\nconst event = $json;\n\nlet meetLink = event.hangoutLink || '';\n\nif (!meetLink && event.conferenceData && Array.isArray(event.conferenceData.entryPoints)) {\n  const videoEntry = event.conferenceData.entryPoints.find(\n    entry => entry.entryPointType === 'video'\n  );\n\n  if (videoEntry && videoEntry.uri) {\n    meetLink = videoEntry.uri;\n  }\n}\n\nconst calendarEventLink = event.htmlLink || '';\nconst calendarEventId = event.id || '';\n\nreturn {\n  json: {\n    ...candidate,\n    calendar_event_id: calendarEventId,\n    calendar_event_link: calendarEventLink,\n    google_meet_link: meetLink || 'Google Meet link will appear in the calendar invite.',\n    interview_start: candidate.interview_start,\n    interview_end: candidate.interview_end,\n    interview_time: candidate.interview_start,\n    status: 'Interview Scheduled',\n    processed: true,\n    updated_at: new Date().toISOString()\n  }\n};"
+      },
+      "id": "4f13ee61-5a8d-4ba2-b3fc-f972f99e346f",
+      "name": "Prepare Interview Invite + Meet Link",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1296,
+        -128
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{$json.email}}",
+        "subject": "=Application Received - {{$json.job_role}}",
+        "message": "=Hi {{$json.full_name}},<br><br>Thank you for applying for the <b>{{$json.job_role}}</b> role.<br><br>We received your application, resume, portfolio links, and WhatsApp number: <b>{{$json.whatsapp_number}}</b>.<br><br>Our team will review your profile and update you soon.<br><br>Regards,<br>Hiring Team",
+        "options": {}
+      },
+      "id": "1dbb7868-2455-4e89-a8dc-fcfdfca5525a",
+      "name": "Send Confirmation Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        2288,
+        -576
+      ],
+      "webhookId": "8d290ab8-4b56-4582-9380-45edbceec3b4"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.ai_prompt }}",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1472,
+        -576
+      ],
+      "id": "f9b48570-f86b-4aa3-9cfb-854a7c829758",
+      "name": "AI Agent - Score Candidate",
+      "executeOnce": false
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"score\": 90,\n  \"category\": \"Strong\",\n  \"summary\": \"Candidate has strong AI automation, n8n, RAG, API and Docker experience. Recommended for interview.\",\n  \"strengths\": [\n    \"Production n8n workflow experience\",\n    \"RAG and local LLM experience\",\n    \"Strong API, Gmail and Docker skills\"\n  ],\n  \"weaknesses\": [\n    \"CRM experience should be verified\",\n    \"Portfolio link should be reviewed\"\n  ],\n  \"recommended_action\": \"Interview\",\n  \"risk_flags\": [\n    \"Verify real production deployment\",\n    \"Check ownership of projects\"\n  ],\n  \"interview_questions\": [\n    \"Explain one n8n workflow you deployed end to end.\",\n    \"How did you build your RAG knowledge vault?\",\n    \"How did you measure business outcome?\"\n  ]\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1616,
+        -368
+      ],
+      "id": "c5c54f06-bfa4-4b52-9d2f-4b69c4119f91",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "final_report",
+        "responseMode": "responseNode",
+        "options": {
+          "rawBody": true
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -32,
+        1008
+      ],
+      "id": "cfca6215-2e28-41a7-b429-1799b819aa1b",
+      "name": "Webhook",
+      "webhookId": "d8013297-d6de-4f65-8ee7-1fd0754dc248"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e9d6b865-de97-4790-a6fa-a63a3ac18f19",
+              "name": "Transcript",
+              "value": "={{ $json.transcript }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1296,
+        1024
+      ],
+      "id": "df7a131b-f3c7-4529-92d9-c9c21dbe8f18",
+      "name": "Transcript"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the transcript from the webhook data\nconst transcript = $input.first().json.body.message.artifact.transcript;\n\nreturn {\n  transcript: transcript\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        704,
+        1008
+      ],
+      "id": "c4cb72da-139f-4f0d-9176-0a730d4398c5",
+      "name": "Cleans the Transcript"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "GPT-4O"
+        },
+        "responses": {
+          "values": [
+            {
+              "content": "=Transcript :  {{ $json.text }}"
+            },
+            {
+              "role": "system",
+              "content": "=You are a STRICT Technical Interview Evaluator for Machine Learning Engineer positions. Evaluate candidate answers and provide accurate scoring.\n\n## SCORING STRUCTURE\n\n| Questions | Difficulty | Points Each | Max Total |\n|-----------|------------|-------------|-----------|\n| Q1, Q2, Q3 | EASY | 5 points each | 15 points |\n| Q4, Q5, Q6 | MEDIUM | 8 points each | 24 points |\n| Q7, Q8, Q9, Q10 | HARD | 10 points each | 40 points |\n\n**Maximum Possible Score: 79 points**\n\n## SCORING CRITERIA\n\n### EASY (Q1-Q3) - Out of 5 each\n| Score | Criteria |\n|-------|----------|\n| 5 | Perfect - complete and accurate |\n| 4 | Good - mostly correct, minor gaps |\n| 3 | Adequate - understands concept but incomplete |\n| 2 | Partial - some understanding, significant gaps |\n| 1 | Minimal - vaguely related, mostly incorrect |\n| 0 | \"I don't know\", no answer, or completely wrong |\n\n### MEDIUM (Q4-Q6) - Out of 8 each\n| Score | Criteria |\n|-------|----------|\n| 8 | Excellent - comprehensive and accurate |\n| 6-7 | Good - correct with minor omissions |\n| 4-5 | Adequate - basics understood, lacks depth |\n| 2-3 | Partial - some correct points, significant errors |\n| 1 | Minimal - slight awareness, mostly wrong |\n| 0 | \"I don't know\", no answer, or completely wrong |\n\n### HARD (Q7-Q10) - Out of 10 each\n| Score | Criteria |\n|-------|----------|\n| 10 | Expert - comprehensive, demonstrates mastery |\n| 8-9 | Strong - thorough with minor gaps |\n| 6-7 | Good - solid grasp of core concepts |\n| 4-5 | Moderate - basics understood, lacks depth |\n| 2-3 | Weak - partial understanding, major gaps |\n| 1 | Minimal - vague attempt |\n| 0 | \"I don't know\", no answer, or completely wrong |\n\n## STRICT RULES\n\n1. **\"I don't know\" = 0 points** - Any form of \"I don't know\", \"No idea\", \"No\", or refusal = ZERO\n2. **Be strict** - When in doubt, give the LOWER score\n3. **Accuracy matters** - Wrong information must be penalized\n4. **Vague = Low score** - Generic answers without substance score low\n\n## RECOMMENDATION THRESHOLDS\n\nCalculate percentage: (total / 79) × 100\n\n| Percentage | Recommendation |\n|------------|----------------|\n| 85-100% | STRONG_HIRE |\n| 70-84% | HIRE |\n| 55-69% | MAYBE |\n| 40-54% | NO_HIRE |\n| 0-39% | STRONG_NO_HIRE |\n\n## OUTPUT FORMAT\n\nReturn ONLY this JSON (no other text, no markdown, no backticks):\n\n{\"name\":\"<Full Name>\",\"exp\":<Years as integer>,\"easy\":<Q1+Q2+Q3 total>,\"medium\":<Q4+Q5+Q6 total>,\"hard\":<Q7+Q8+Q9+Q10 total>,\"total\":<Sum of all>,\"recommendation\":\"<STRONG_HIRE|HIRE|MAYBE|NO_HIRE|STRONG_NO_HIRE>\",\"feedback\":\"<2-3 sentence assessment of candidate's performance, strengths and weaknesses>\"}\n\n## CALCULATION STEPS\n\n1. Score each question individually based on criteria\n2. Add Q1 + Q2 + Q3 = easy (max 15)\n3. Add Q4 + Q5 + Q6 = medium (max 24)\n4. Add Q7 + Q8 + Q9 + Q10 = hard (max 40)\n5. Add easy + medium + hard = total (max 79)\n6. Calculate percentage = (total / 79) × 100\n7. Determine recommendation based on percentage\n8. Write brief feedback highlighting key observations\n\nDouble-check your arithmetic before responding.\n\n"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2,
+      "position": [
+        2096,
+        1008
+      ],
+      "id": "f5514d33-e19f-46b6-81d0-5c8339193fdb",
+      "name": "Final Response"
+    },
+    {
+      "parameters": {
+        "jsCode": "// n8n Code node — placed *after* the “Final Response” node\n\n// 1. Get the output from the previous node\nconst prev = $node[\"Final Response\"].json;\n\n// 2. In your example, the JSON is in prev.output[0].content[0].text\n//    (this depends on how exactly your previous node returns data — adjust if needed)\nlet parsed;\ntry {\n  parsed = JSON.parse(prev.output[0].content[0].text);\n} catch (err) {\n  throw new Error(\"Could not parse JSON from Final Response: \" + err.message);\n}\n\n// 3. Return as correct n8n output format\nreturn [\n  {\n    json: parsed\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2656,
+        1008
+      ],
+      "id": "8b413d91-99c7-4471-b313-b887c78c3107",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_INTERVIEW_EVALUATION_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Sheet1",
+          "mode": "name",
+          "cachedResultName": "Sheet1"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name": "={{ $json.name }}",
+            "Exp": "={{ $json.exp }}",
+            "Easy(15)": "={{ $json.easy }}",
+            "Medium(24)": "={{ $json.medium }}",
+            "Hard(40)": "={{ $json.hard }}",
+            "Total(80)": "={{ $json.total }}",
+            "Recomendation": "={{ $json.recommendation }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Exp",
+              "displayName": "Exp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Easy(15)",
+              "displayName": "Easy(15)",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Medium(24)",
+              "displayName": "Medium(24)",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Hard(40)",
+              "displayName": "Hard(40)",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Total(80)",
+              "displayName": "Total(80)",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Recomendation",
+              "displayName": "Recomendation",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2912,
+        1008
+      ],
+      "id": "617d3308-b80e-438c-af85-a735dd9d8a0e",
+      "name": "Append row in sheet"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"status\": 200,\n  \"body\": { \"received\": true }\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        3184,
+        1008
+      ],
+      "id": "97227cb9-495d-4a01-95b0-2d921880db80",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "content": "## AI TECHNICAL INTERVIEWER\n\nAutomatic evaluation of ML Engineer candidates from Vapi voice interviews\n\nFLOW: Vapi Webhook > Parse Transcript > AI Evaluation > Store Results\n\nSCORING:\nEasy (15pts) + Medium (24pts) + Hard (40pts) = 79pts max\n\nStatus: Production Ready",
+        "height": 312,
+        "width": 692,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1216,
+        736
+      ],
+      "id": "2ae90a76-6b34-4310-a2a9-c1ab9efcb23e",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## STEP 1: WEBHOOK\n\nReceives end-of-call report from Rumik.AI\n\nEndpoint: POST /final_report\n\nContains full interview transcript",
+        "height": 520,
+        "width": 568,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -304,
+        672
+      ],
+      "id": "cca45b45-d982-4f71-8ad8-15ca5966bc41",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## STEP 2: EXTRACT\n\nCode Node extracts transcript from nested JSON\n\nSet Node stores it as variable",
+        "height": 504,
+        "width": 584,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        448,
+        688
+      ],
+      "id": "2e59205e-822f-4883-9e27-b0d0a6777527",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "## STEP 3: PARSE Q&A\n\nGPT-4.1-mini parses transcript\n\nOutput format:\nName: John Doe\nExp: 3 years\nQ1: Question\nA1: Answer\n\nCost-efficient model",
+        "height": 496,
+        "width": 712,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1184,
+        688
+      ],
+      "id": "395ca057-0fb7-4f2a-a784-21df49711b15",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "## STEP 4: EVALUATE\n\nGPT-4o scores each answer\n\nEasy Q1-Q3: 15 pts max\nMedium Q4-Q6: 24 pts max\nHard Q7-Q10: 40 pts max\n\nOutputs JSON with scores",
+        "height": 496,
+        "width": 584,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1952,
+        688
+      ],
+      "id": "ca560212-9f3b-4995-9db3-a677ba38f575",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "## STEP 5: STORE\n\nCode Node parses GPT-4 response\n\nGoogle Sheets stores:\nName, Exp, Easy, Medium, Hard, Total, Recommendation\n\nRespond confirms to Vapi",
+        "height": 496,
+        "width": 1148,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2576,
+        688
+      ],
+      "id": "92a3b8fe-08ca-4827-b31d-53a25623fe2d",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "content": "## THRESHOLDS\n\n85-100%: STRONG_HIRE\n70-84%: HIRE\n55-69%: MAYBE\n40-54%: NO_HIRE\n0-39%: STRONG_NO_HIRE",
+        "height": 424,
+        "width": 588,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1936,
+        1312
+      ],
+      "id": "763b0ff9-8ba7-4910-99ff-5a3e9d605606",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "content": "## MODEL\n\nGPT-4.1-mini\nCost-effective for parsing",
+        "height": 196,
+        "width": 376,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1376,
+        1216
+      ],
+      "id": "ba79e93d-d575-4b29-8e86-9adbeca0e8e5",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "content": "## VAPI SETUP\n\n1. Server URL: n8n webhook URL\n2. Enable: end-of-call-report\n3. Upload: questions.txt",
+        "height": 380,
+        "width": 532
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -352,
+        1376
+      ],
+      "id": "d8a16865-15cb-46be-8d1c-de2a30a29e5c",
+      "name": "Sticky Note8"
+    },
+    {
+      "parameters": {
+        "content": "## IMPORTANT\n\nI dont know = 0 points\nScoring is STRICT\nMax score: 79 points\nHR reviews in Sheets",
+        "height": 364,
+        "width": 464
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3072,
+        1280
+      ],
+      "id": "41caeb2d-7588-45d8-a80b-c8d04d2a744c",
+      "name": "Sticky Note9"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        1584,
+        1264
+      ],
+      "id": "059ccca3-f49f-443c-98ad-b57ee5d69216",
+      "name": "OpenAI Chat Model1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Transcript : {{$json.Transcript}}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=You are a helpful assistant whose job is to parse a full dialog {{ $json.Transcript }} between an AI interviewer and a user.  \nGiven a transcript in which lines are prefixed by roles (“AI:” or “User:”), your task is to output:  \n  1. The candidate’s **name** (if mentioned)  \n  2. The candidate’s **years of experience** (if mentioned)  \n  3. A structured sequence of question–answer pairs.\n\nRules:\n\n- First, scan the transcript for a line where the user states their full name. The user’s name will be taken from that line.  \n- Also scan for when the user indicates their years of experience (e.g. “I have three years of experience”). Extract that number (or phrase) as “Years of experience.”  \n- Then identify each question asked by the AI (lines starting with “AI:” containing a question mark) — number them Q1, Q2, … in order.  \n- For each question, find the subsequent “User:” line (even if the user says “I don’t know”, or “No”, that is counted as their answer) — that becomes A1, A2, … respectively.  \n- Do **not** modify or paraphrase the user’s answers — preserve them as-is.  \n- If AI asks a question but user never responds (e.g. transcript ends), skip that Q.  \n- Format output as follows:\n\nName: <candidate name or “Not found”>  \nYears of experience: <years or “Not found”>  \n\nQ1: <first AI question>  \nA1: <user’s answer to Q1>\n\nQ2: <second AI question>  \nA2: <user’s answer to Q2>\n\n… etc.\n\nReturn only the structured data (no additional commentary).\n\n---  \n\n\n"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        1536,
+        1024
+      ],
+      "id": "efe4d560-28f3-4fa7-8b1a-55907c7b1291",
+      "name": "Q and A Detection"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        1344,
+        -336
+      ],
+      "id": "50dd2898-60ef-416e-923a-f2d9ae7d5d32",
+      "name": "OpenRouter Chat Model"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule - Resume Ingestion": {
+      "main": [
+        [
+          {
+            "node": "Read Applications Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Applications Sheet": {
+      "main": [
+        [
+          {
+            "node": "Clean + Filter + Normalize WhatsApp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clean + Filter + Normalize WhatsApp": {
+      "main": [
+        [
+          {
+            "node": "Resume Loop",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Resume Loop": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Download Resume PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Resume PDF": {
+      "main": [
+        [
+          {
+            "node": "Extract Resume Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Resume Text": {
+      "main": [
+        [
+          {
+            "node": "Build AI Hiring Score Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build AI Hiring Score Prompt": {
+      "main": [
+        [
+          {
+            "node": "AI Agent - Score Candidate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse AI Hiring Score": {
+      "main": [
+        [
+          {
+            "node": "Update Sheet - AI Scored",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Sheet - AI Scored": {
+      "main": [
+        [
+          {
+            "node": "Send Confirmation Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Optional WhatsApp Confirmation - Configure Provider": {
+      "main": [
+        [
+          {
+            "node": "Resume Loop",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule - Smart Routing": {
+      "main": [
+        [
+          {
+            "node": "Read Scored Candidates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Scored Candidates": {
+      "main": [
+        [
+          {
+            "node": "Filter Scored Candidates Pending Routing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Scored Candidates Pending Routing": {
+      "main": [
+        [
+          {
+            "node": "Candidate Routing Loop",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Candidate Routing Loop": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Decide Interview / Manual / HR Approval",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Decide Interview / Manual / HR Approval": {
+      "main": [
+        [
+          {
+            "node": "Route Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route Switch": {
+      "main": [
+        [
+          {
+            "node": "Create Interview Event",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send HR Manual Review Email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send HR Approval Before Rejection",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Interview Event": {
+      "main": [
+        [
+          {
+            "node": "Prepare Interview Invite + Meet Link",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Interview Email": {
+      "main": [
+        [
+          {
+            "node": "Optional WhatsApp Interview Invite - Configure Provider",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Optional WhatsApp Interview Invite - Configure Provider": {
+      "main": [
+        [
+          {
+            "node": "Update Status - Interview Scheduled",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Status - Interview Scheduled": {
+      "main": [
+        [
+          {
+            "node": "Candidate Routing Loop",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send HR Manual Review Email": {
+      "main": [
+        [
+          {
+            "node": "Update Status - Manual Review",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Status - Manual Review": {
+      "main": [
+        [
+          {
+            "node": "Candidate Routing Loop",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send HR Approval Before Rejection": {
+      "main": [
+        [
+          {
+            "node": "Update Status - Rejection Pending HR Approval",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Status - Rejection Pending HR Approval": {
+      "main": [
+        [
+          {
+            "node": "Candidate Routing Loop",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Interview Invite + Meet Link": {
+      "main": [
+        [
+          {
+            "node": "Send Interview Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Confirmation Email": {
+      "main": [
+        [
+          {
+            "node": "Optional WhatsApp Confirmation - Configure Provider",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent - Score Candidate": {
+      "main": [
+        [
+          {
+            "node": "Parse AI Hiring Score",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent - Score Candidate",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Cleans the Transcript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cleans the Transcript": {
+      "main": [
+        [
+          {
+            "node": "Transcript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcript": {
+      "main": [
+        [
+          {
+            "node": "Q and A Detection",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Final Response": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Q and A Detection",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Q and A Detection": {
+      "main": [
+        [
+          {
+            "node": "Final Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent - Score Candidate",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "nodeGroups": [],
+  "tags": []
+}
