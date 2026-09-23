@@ -1,0 +1,1857 @@
+﻿{
+    "nodes":  [
+                  {
+                      "parameters":  {
+                                         "rule":  {
+                                                      "interval":  [
+                                                                       {
+                                                                           "field":  "cronExpression",
+                                                                           "expression":  "0 2 * * *"
+                                                                       }
+                                                                   ]
+                                                  }
+                                     },
+                      "id":  "d4f16cb+00 0000 0000e2-be0a-397c400fa8d1",
+                      "name":  "Daily 02:00 IST",
+                      "type":  "n8n-nodes-base.scheduleTrigger",
+                      "typeVersion":  1.4,
+                      "position":  [
+                                       -1264,
+                                       320
+                                   ]
+                  },
+                  {
+                      "parameters":  {
+                                         "jsCode":  "\n// Asia/Kolkata is UTC+05:30 (no DST). Compute \"yesterday\" in IST independent of server TZ.\nconst IST_OFFSET_MS = (5 * 60 + 30) * 60 * 1000;\nconst nowUtcMs = Date.now();\nconst istNow = new Date(nowUtcMs + IST_OFFSET_MS);\nconst istYesterday = new Date(istNow.getTime() - 24 * 60 * 60 * 1000);\nconst yyyy = istYesterday.getUTCFullYear();\nconst mm = String(istYesterday.getUTCMonth() + 1).padStart(2, \u00270\u0027);\nconst dd = String(istYesterday.getUTCDate()).padStart(2, \u00270\u0027);\nconst target_date = yyyy + \u0027-\u0027 + mm + \u0027-\u0027 + dd;\nconst run_id = \u0027run_\u0027 + $execution.id + \u0027_\u0027 + target_date;\nreturn [{ json: { run_id: run_id, target_date: target_date, timezone: \u0027Asia/Kolkata\u0027 } }];\n"
+                                     },
+                      "id":  "c57efb+00 0000 0000a0-b5fa-5b5a94b2abda",
+                      "name":  "Compute Run Context",
+                      "type":  "n8n-nodes-base.code",
+                      "typeVersion":  2,
+                      "position":  [
+                                       -1040,
+                                       320
+                                   ]
+                  },
+                  {
+                      "parameters":  {
+                                         "documentId":  "REDACTED_DOCUMENTID",
+                                         "sheetName":  {
+                                                           "__rl":  true,
+                                                           "mode":  "name",
+                                                           "value":  "Account_Master"
+                                                       },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "id":  "c1078c08-bcba-46a8-a0e1-13fa4e2bcb3b",
+                      "name":  "Read Account_Master",
+                      "type":  "n8n-nodes-base.googleSheets",
+                      "typeVersion":  4.7,
+                      "position":  [
+                                       -816,
+                                       320
+                                   ],
+                      "credentials":  "REDACTED_CREDENTIALS"
+                  },
+                  {
+                      "parameters":  {
+                                         "conditions":  {
+                                                            "options":  {
+                                                                            "caseSensitive":  false,
+                                                                            "leftValue":  "",
+                                                                            "typeValidation":  "loose",
+                                                                            "version":  1
+                                                                        },
+                                                            "conditions":  [
+                                                                               {
+                                                                                   "id":  "is-active",
+                                                                                   "leftValue":  "={{ String($json.Active).trim().toLowerCase() }}",
+                                                                                   "rightValue":  "true",
+                                                                                   "operator":  {
+                                                                                                    "type":  "string",
+                                                                                                    "operation":  "equals"
+                                                                                                }
+                                                                               }
+                                                                           ],
+                                                            "combinator":  "and"
+                                                        },
+                                         "options":  {
+                                                         "ignoreCase":  true
+                                                     }
+                                     },
+                      "id":  "860ad7c8-588d-41da-bf49-d2d34d76b0a7",
+                      "name":  "Active = TRUE",
+                      "type":  "n8n-nodes-base.filter",
+                      "typeVersion":  2.3,
+                      "position":  [
+                                       -592,
+                                       320
+                                   ]
+                  },
+                  {
+                      "parameters":  {
+                                         "rules":  {
+                                                       "values":  [
+                                                                      {
+                                                                          "conditions":  {
+                                                                                             "options":  {
+                                                                                                             "caseSensitive":  false,
+                                                                                                             "leftValue":  "",
+                                                                                                             "typeValidation":  "loose",
+                                                                                                             "version":  1
+                                                                                                         },
+                                                                                             "conditions":  [
+                                                                                                                {
+                                                                                                                    "leftValue":  "={{ $json.Platform }}",
+                                                                                                                    "rightValue":  "Instagram",
+                                                                                                                    "operator":  {
+                                                                                                                                     "type":  "string",
+                                                                                                                                     "operation":  "equals"
+                                                                                                                                 }
+                                                                                                                }
+                                                                                                            ],
+                                                                                             "combinator":  "and"
+                                                                                         },
+                                                                          "renameOutput":  true,
+                                                                          "outputKey":  "instagram"
+                                                                      },
+                                                                      {
+                                                                          "conditions":  {
+                                                                                             "options":  {
+                                                                                                             "caseSensitive":  false,
+                                                                                                             "leftValue":  "",
+                                                                                                             "typeValidation":  "loose",
+                                                                                                             "version":  1
+                                                                                                         },
+                                                                                             "conditions":  [
+                                                                                                                {
+                                                                                                                    "leftValue":  "={{ $json.Platform }}",
+                                                                                                                    "rightValue":  "Facebook",
+                                                                                                                    "operator":  {
+                                                                                                                                     "type":  "string",
+                                                                                                                                     "operation":  "equals"
+                                                                                                                                 }
+                                                                                                                }
+                                                                                                            ],
+                                                                                             "combinator":  "and"
+                                                                                         },
+                                                                          "renameOutput":  true,
+                                                                          "outputKey":  "facebook"
+                                                                      },
+                                                                      {
+                                                                          "conditions":  {
+                                                                                             "options":  {
+                                                                                                             "caseSensitive":  false,
+                                                                                                             "leftValue":  "",
+                                                                                                             "typeValidation":  "loose",
+                                                                                                             "version":  1
+                                                                                                         },
+                                                                                             "conditions":  [
+                                                                                                                {
+                                                                                                                    "leftValue":  "={{ $json.Platform }}",
+                                                                                                                    "rightValue":  "YouTube",
+                                                                                                                    "operator":  {
+                                                                                                                                     "type":  "string",
+                                                                                                                                     "operation":  "equals"
+                                                                                                                                 }
+                                                                                                                }
+                                                                                                            ],
+                                                                                             "combinator":  "and"
+                                                                                         },
+                                                                          "renameOutput":  true,
+                                                                          "outputKey":  "youtube"
+                                                                      },
+                                                                      {
+                                                                          "conditions":  {
+                                                                                             "options":  {
+                                                                                                             "caseSensitive":  false,
+                                                                                                             "leftValue":  "",
+                                                                                                             "typeValidation":  "loose",
+                                                                                                             "version":  1
+                                                                                                         },
+                                                                                             "conditions":  [
+                                                                                                                {
+                                                                                                                    "leftValue":  "={{ $json.Platform }}",
+                                                                                                                    "rightValue":  "LinkedIn",
+                                                                                                                    "operator":  {
+                                                                                                                                     "type":  "string",
+                                                                                                                                     "operation":  "equals"
+                                                                                                                                 }
+                                                                                                                }
+                                                                                                            ],
+                                                                                             "combinator":  "and"
+                                                                                         },
+                                                                          "renameOutput":  true,
+                                                                          "outputKey":  "linkedin"
+                                                                      }
+                                                                  ]
+                                                   },
+                                         "options":  {
+                                                         "fallbackOutput":  "extra",
+                                                         "renameFallbackOutput":  "unsupported"
+                                                     }
+                                     },
+                      "id":  "8571d353-9ed9-4bdf-b350-d9e64c56ae3c",
+                      "name":  "Route by Platform",
+                      "type":  "n8n-nodes-base.switch",
+                      "typeVersion":  3.4,
+                      "position":  [
+                                       -368,
+                                       272
+                                   ]
+                  },
+                  {
+                      "parameters":  {
+                                         "workflowId":  {
+                                                            "__rl":  true,
+                                                            "mode":  "id",
+                                                            "value":  "DwVAY47HegtigQ6u",
+                                                            "cachedResultName":  "WF2 - Meta Collector"
+                                                        },
+                                         "workflowInputs":  {
+                                                                "mappingMode":  "defineBelow",
+                                                                "value":  {
+                                                                              "run_id":  "={{ $(\u0027Compute Run Context\u0027).first().json.run_id }}",
+                                                                              "target_date":  "={{ $(\u0027Compute Run Context\u0027).first().json.target_date }}",
+                                                                              "account_id":  "={{ $json.Account_ID }}",
+                                                                              "brand_id":  "={{ $json.Brand_ID }}",
+                                                                              "brand_name":  "={{ $json.Brand_Name }}",
+                                                                              "platform":  "={{ $json.Platform }}",
+                                                                              "account_type":  "={{ $json.Account_Type }}",
+                                                                              "platform_account_id":  "={{ $json.Platform_Account_ID }}",
+                                                                              "credential_name":  "REDACTED_CREDENTIAL_NAME",
+                                                                              "timezone":  "={{ $json.Timezone }}"
+                                                                          },
+                                                                "matchingColumns":  [
+
+                                                                                    ],
+                                                                "schema":  [
+                                                                               {
+                                                                                   "id":  "run_id",
+                                                                                   "displayName":  "run_id",
+                                                                                   "required":  false,
+                                                                                   "display":  true,
+                                                                                   "type":  "string",
+                                                                                   "canBeUsedToMatch":  false
+                                                                               },
+                                                                               {
+                                                                                   "id":  "target_date",
+                                                                                   "displayName":  "target_date",
+                                                                                   "required":  false,
+                                                                                   "display":  true,
+                                                                                   "type":  "string",
+                                                                                   "canBeUsedToMatch":  false
+                                                                               },
+                                                                               {
+                                                                                   "id":  "account_id",
+                                                                                   "displayName":  "account_id",
+                                                                                   "required":  false,
+                                                                                   "display":  true,
+                                                                                   "type":  "string",
+                                                                                   "canBeUsedToMatch":  false
+                                                                               },
+                                                                               {
+                                                                                   "id":  "brand_id",
+                                                                                   "displayName":  "brand_id",
+                                                                                   "required":  false,
+                                                                                   "display":  true,
+                                                                                   "type":  "string",
+                                                                                   "canBeUsedToMatch":  false
+                                                                               },
+                                                                               {
+                                                                                   "id":  "brand_name",
+                                                                                   "displayName":  "brand_name",
+                                                                                   "required":  false,
+                                                                                   "display":  true,
+                                                                                   "type":  "string",
+                                                                                   "canBeUsedToMatch":  false
+                                                                               },
+                                                                               {
+                                                                                   "id":  "platform",
+                                                                                   "displayName":  "platform",
+                                                                                   "required":  false,
+                                                                                   "display":  true,
+                                                                                   "type":  "string",
+                                                                                   "canBeUsedToMatch":  false
+                                                                               },
+                                                                               {
+                                                                                   "id":  "account_type",
+                                                                                   "displayName":  "account_type",
+                                                                                   "required":  false,
+                                                                                   "display":  true,
+                                                                                   "type":  "string",
+                                                                                   "canBeUsedToMatch":  false
+                                                                               },
+                                                                               {
+                                                                                   "id":  "platform_account_id",
+                                                                                   "displayName":  "platform_account_id",
+                                                                                   "required":  false,
+                                                                                   "display":  true,
+                                                                                   "type":  "string",
+                                                                                   "canBeUsedToMatch":  false
+                                                                               },
+                                                                               {
+                                                                                   "id":  "credential_name",
+                                                                                   "displayName":  "credential_name",
+                                                                                   "required":  false,
+                                                                                   "display":  true,
+                                                                                   "type":  "string",
+                                                                                   "canBeUsedToMatch":  false
+                                                                               },
+                                                                               {
+                                                                                   "id":  "timezone",
+                                                                                   "displayName":  "timezone",
+                                                                                   "required":  false,
+                                                                                   "display":  true,
+                                                                                   "type":  "string",
+                                                                                   "canBeUsedToMatch":  false
+                                                                               }
+                                                                           ]
+                                                            },
+                                         "mode":  "each",
+                                         "options":  {
+                                                         "waitForSubWorkflow":  true
+                                                     }
+                                     },
+                      "id":  "3e711ab9-4973-4f55-b976-5a3ae44d9b7b",
+                      "name":  "Meta Collector",
+                      "type":  "n8n-nodes-base.executeWorkflow",
+                      "typeVersion":  1.3,
+                      "position":  [
+                                       -144,
+                                       128
+                                   ],
+                      "onError":  "continueRegularOutput"
+                  },
+                  {
+                      "parameters":  {
+                                         "workflowId":  {
+                                                            "__rl":  true,
+                                                            "mode":  "id",
+                                                            "value":  "9tEpymhUoXEGGwRp",
+                                                            "cachedResultName":  "WF3 - YouTube Collector"
+                                                        },
+                                         "workflowInputs":  {
+                                                                "mappingMode":  "defineBelow",
+                                                                "value":  {
+                                                                              "run_id":  "={{ $(\u0027Compute Run Context\u0027).first().json.run_id }}",
+                                                                              "target_date":  "={{ $(\u0027Compute Run Context\u0027).first().json.target_date }}",
+                                                                              "account_id":  "={{ $json.Account_ID }}",
+                                                                              "brand_id":  "={{ $json.Brand_ID }}",
+                                                                              "brand_name":  "={{ $json.Brand_Name }}",
+                                                                              "platform":  "={{ $json.Platform }}",
+                                                                              "account_type":  "={{ $json.Account_Type }}",
+                                                                              "platform_account_id":  "={{ $json.Platform_Account_ID }}",
+                                                                              "credential_name":  "REDACTED_CREDENTIAL_NAME",
+                                                                              "timezone":  "={{ $json.Timezone }}"
+                                                                          },
+                                                                "matchingColumns":  [
+
+                                                                                    ],
+                                                                "schema":  [
+                                                                               {
+                                                                                   "id":  "run_id",
+                                                                                   "displayName":  "run_id",
+                                                                                   "required":  false,
+                                                                                   "display":  true,
+                                                                                   "type":  "string",
+                                                                                   "canBeUsedToMatch":  false
+                                                                               },
+                                                                               {
+                                                                                   "id":  "target_date",
+                                                                                   "displayName":  "target_date",
+                                                                                   "required":  false,
+                                                                                   "display":  true,
+                                                                                   "type":  "string",
+                                                                                   "canBeUsedToMatch":  false
+                                                                               },
+                                                                               {
+                                                                                   "id":  "account_id",
+                                                                                   "displayName":  "account_id",
+                                                                                   "required":  false,
+                                                                                   "display":  true,
+                                                                                   "type":  "string",
+                                                                                   "canBeUsedToMatch":  false
+                                                                               },
+                                                                               {
+                                                                                   "id":  "brand_id",
+                                                                                   "displayName":  "brand_id",
+                                                                                   "required":  false,
+                                                                                   "display":  true,
+                                                                                   "type":  "string",
+                                                                                   "canBeUsedToMatch":  false
+                                                                               },
+                                                                               {
+                                                                                   "id":  "brand_name",
+                                                                                   "displayName":  "brand_name",
+                                                                                   "required":  false,
+                                                                                   "display":  true,
+                                                                                   "type":  "string",
+                                                                                   "canBeUsedToMatch":  false
+                                                                               },
+                                                                               {
+                                                                                   "id":  "platform",
+                                                                                   "displayName":  "platform",
+                                                                                   "required":  false,
+                                                                                   "display":  true,
+                                                                                   "type":  "string",
+                                                                                   "canBeUsedToMatch":  false
+                                                                               },
+                                                                               {
+                                                                                   "id":  "account_type",
+                                                                                   "displayName":  "account_type",
+                                                                                   "required":  false,
+                                                                                   "display":  true,
+                                                                                   "type":  "string",
+                                                                                   "canBeUsedToMatch":  false
+                                                                               },
+                                                                               {
+                                                                                   "id":  "platform_account_id",
+                                                                                   "displayName":  "platform_account_id",
+                                                                                   "required":  false,
+                                                                                   "display":  true,
+                                                                                   "type":  "string",
+                                                                                   "canBeUsedToMatch":  false
+                                                                               },
+                                                                               {
+                                                                                   "id":  "credential_name",
+                                                                                   "displayName":  "credential_name",
+                                                                                   "required":  false,
+                                                                                   "display":  true,
+                                                                                   "type":  "string",
+                                                                                   "canBeUsedToMatch":  false
+                                                                               },
+                                                                               {
+                                                                                   "id":  "timezone",
+                                                                                   "displayName":  "timezone",
+                                                                                   "required":  false,
+                                                                                   "display":  true,
+                                                                                   "type":  "string",
+                                                                                   "canBeUsedToMatch":  false
+                                                                               }
+                                                                           ]
+                                                            },
+                                         "mode":  "each",
+                                         "options":  {
+                                                         "waitForSubWorkflow":  true
+                                                     }
+                                     },
+                      "id":  "56051e8f-3f0d-4a47-91a6-548eca15916a",
+                      "name":  "YouTube Collector",
+                      "type":  "n8n-nodes-base.executeWorkflow",
+                      "typeVersion":  1.3,
+                      "position":  [
+                                       -144,
+                                       320
+                                   ],
+                      "onError":  "continueRegularOutput"
+                  },
+                  {
+                      "parameters":  {
+                                         "workflowId":  {
+                                                            "__rl":  true,
+                                                            "mode":  "id",
+                                                            "value":  "wzBiMjsUJi73dA7l",
+                                                            "cachedResultName":  "WF4 - LinkedIn Collector"
+                                                        },
+                                         "workflowInputs":  {
+                                                                "mappingMode":  "defineBelow",
+                                                                "value":  {
+                                                                              "run_id":  "={{ $(\u0027Compute Run Context\u0027).first().json.run_id }}",
+                                                                              "target_date":  "={{ $(\u0027Compute Run Context\u0027).first().json.target_date }}",
+                                                                              "account_id":  "={{ $json.Account_ID }}",
+                                                                              "brand_id":  "={{ $json.Brand_ID }}",
+                                                                              "brand_name":  "={{ $json.Brand_Name }}",
+                                                                              "platform":  "={{ $json.Platform }}",
+                                                                              "account_type":  "={{ $json.Account_Type }}",
+                                                                              "platform_account_id":  "={{ $json.Platform_Account_ID }}",
+                                                                              "credential_name":  "REDACTED_CREDENTIAL_NAME",
+                                                                              "timezone":  "={{ $json.Timezone }}"
+                                                                          },
+                                                                "matchingColumns":  [
+
+                                                                                    ],
+                                                                "schema":  [
+                                                                               {
+                                                                                   "id":  "run_id",
+                                                                                   "displayName":  "run_id",
+                                                                                   "required":  false,
+                                                                                   "display":  true,
+                                                                                   "type":  "string",
+                                                                                   "canBeUsedToMatch":  false
+                                                                               },
+                                                                               {
+                                                                                   "id":  "target_date",
+                                                                                   "displayName":  "target_date",
+                                                                                   "required":  false,
+                                                                                   "display":  true,
+                                                                                   "type":  "string",
+                                                                                   "canBeUsedToMatch":  false
+                                                                               },
+                                                                               {
+                                                                                   "id":  "account_id",
+                                                                                   "displayName":  "account_id",
+                                                                                   "required":  false,
+                                                                                   "display":  true,
+                                                                                   "type":  "string",
+                                                                                   "canBeUsedToMatch":  false
+                                                                               },
+                                                                               {
+                                                                                   "id":  "brand_id",
+                                                                                   "displayName":  "brand_id",
+                                                                                   "required":  false,
+                                                                                   "display":  true,
+                                                                                   "type":  "string",
+                                                                                   "canBeUsedToMatch":  false
+                                                                               },
+                                                                               {
+                                                                                   "id":  "brand_name",
+                                                                                   "displayName":  "brand_name",
+                                                                                   "required":  false,
+                                                                                   "display":  true,
+                                                                                   "type":  "string",
+                                                                                   "canBeUsedToMatch":  false
+                                                                               },
+                                                                               {
+                                                                                   "id":  "platform",
+                                                                                   "displayName":  "platform",
+                                                                                   "required":  false,
+                                                                                   "display":  true,
+                                                                                   "type":  "string",
+                                                                                   "canBeUsedToMatch":  false
+                                                                               },
+                                                                               {
+                                                                                   "id":  "account_type",
+                                                                                   "displayName":  "account_type",
+                                                                                   "required":  false,
+                                                                                   "display":  true,
+                                                                                   "type":  "string",
+                                                                                   "canBeUsedToMatch":  false
+                                                                               },
+                                                                               {
+                                                                                   "id":  "platform_account_id",
+                                                                                   "displayName":  "platform_account_id",
+                                                                                   "required":  false,
+                                                                                   "display":  true,
+                                                                                   "type":  "string",
+                                                                                   "canBeUsedToMatch":  false
+                                                                               },
+                                                                               {
+                                                                                   "id":  "credential_name",
+                                                                                   "displayName":  "credential_name",
+                                                                                   "required":  false,
+                                                                                   "display":  true,
+                                                                                   "type":  "string",
+                                                                                   "canBeUsedToMatch":  false
+                                                                               },
+                                                                               {
+                                                                                   "id":  "timezone",
+                                                                                   "displayName":  "timezone",
+                                                                                   "required":  false,
+                                                                                   "display":  true,
+                                                                                   "type":  "string",
+                                                                                   "canBeUsedToMatch":  false
+                                                                               }
+                                                                           ]
+                                                            },
+                                         "mode":  "each",
+                                         "options":  {
+                                                         "waitForSubWorkflow":  true
+                                                     }
+                                     },
+                      "id":  "df830631-db0e-44ac-bb3f-14c91c07b8a8",
+                      "name":  "LinkedIn Collector",
+                      "type":  "n8n-nodes-base.executeWorkflow",
+                      "typeVersion":  1.3,
+                      "position":  [
+                                       -144,
+                                       512
+                                   ],
+                      "onError":  "continueRegularOutput"
+                  },
+                  {
+                      "parameters":  {
+                                         "mode":  "runOnceForEachItem",
+                                         "jsCode":  "\nconst j = $json;\nreturn {\n  json: {\n    run_id: $(\u0027Compute Run Context\u0027).first().json.run_id,\n    target_date: $(\u0027Compute Run Context\u0027).first().json.target_date,\n    account_id: j.Account_ID || null,\n    brand_id: j.Brand_ID || null,\n    brand_name: j.Brand_Name || null,\n    platform: j.Platform || null,\n    account_type: j.Account_Type || null,\n    platform_account_id: j.Platform_Account_ID || null,\n    followers: null, followers_gained: null, followers_lost: null,\n    impressions: null, reach: null, views: null, likes: null, comments: null,\n    shares: null, saves: null, engagements: null, engagement_rate: null,\n    posts_published: null, video_views: null, watch_time: null,\n    profile_views: null, link_clicks: null,\n    data_status: \u0027FAILED\u0027,\n    collected_at: new Date().toISOString(),\n    error_message: \u0027Unsupported platform in Account_Master: \u0027 + (j.Platform || \u0027unknown\u0027),\n    http_status: null,\n    operation: \u0027orchestrator.unsupported_platform\u0027,\n  },\n};\n"
+                                     },
+                      "id":  "05be5949-da8c-4181-9afa-502df0530c31",
+                      "name":  "Unsupported Platform",
+                      "type":  "n8n-nodes-base.code",
+                      "typeVersion":  2,
+                      "position":  [
+                                       -144,
+                                       704
+                                   ]
+                  },
+                  {
+                      "parameters":  {
+                                         "jsCode":  "return $input.all();"
+                                     },
+                      "id":  "6abcac0b-7d0d-4543-902a-2df3ac70d18c",
+                      "name":  "Collect Results",
+                      "type":  "n8n-nodes-base.code",
+                      "typeVersion":  2,
+                      "position":  [
+                                       80,
+                                       320
+                                   ]
+                  },
+                  {
+                      "parameters":  {
+                                         "operation":  "appendOrUpdate",
+                                         "documentId":  "REDACTED_DOCUMENTID",
+                                         "sheetName":  {
+                                                           "__rl":  true,
+                                                           "mode":  "name",
+                                                           "value":  "Daily_Metrics"
+                                                       },
+                                         "columns":  {
+                                                         "mappingMode":  "defineBelow",
+                                                         "value":  {
+                                                                       "Date":  "={{ $json.target_date }}",
+                                                                       "Account_ID":  "={{ $json.account_id }}",
+                                                                       "Brand_ID":  "={{ $json.brand_id }}",
+                                                                       "Brand_Name":  "={{ $json.brand_name }}",
+                                                                       "Platform":  "={{ $json.platform }}",
+                                                                       "Account_Type":  "={{ $json.account_type }}",
+                                                                       "Platform_Account_ID":  "={{ $json.platform_account_id }}",
+                                                                       "Followers":  "={{ $json.followers }}",
+                                                                       "Followers_Gained":  "={{ $json.followers_gained }}",
+                                                                       "Followers_Lost":  "={{ $json.followers_lost }}",
+                                                                       "Impressions":  "={{ $json.impressions }}",
+                                                                       "Reach":  "={{ $json.reach }}",
+                                                                       "Views":  "={{ $json.views }}",
+                                                                       "Likes":  "={{ $json.likes }}",
+                                                                       "Comments":  "={{ $json.comments }}",
+                                                                       "Shares":  "={{ $json.shares }}",
+                                                                       "Saves":  "={{ $json.saves }}",
+                                                                       "Engagements":  "={{ $json.engagements }}",
+                                                                       "Engagement_Rate":  "={{ $json.engagement_rate }}",
+                                                                       "Posts_Published":  "={{ $json.posts_published }}",
+                                                                       "Video_Views":  "={{ $json.video_views }}",
+                                                                       "Watch_Time":  "={{ $json.watch_time }}",
+                                                                       "Profile_Views":  "={{ $json.profile_views }}",
+                                                                       "Link_Clicks":  "={{ $json.link_clicks }}",
+                                                                       "Data_Status":  "={{ $json.data_status }}",
+                                                                       "Collected_At":  "={{ $json.collected_at }}",
+                                                                       "Error_Message":  "={{ $json.error_message }}"
+                                                                   },
+                                                         "matchingColumns":  [
+                                                                                 "Date",
+                                                                                 "Account_ID"
+                                                                             ],
+                                                         "schema":  [
+                                                                        {
+                                                                            "id":  "Date",
+                                                                            "displayName":  "Date",
+                                                                            "required":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true
+                                                                        },
+                                                                        {
+                                                                            "id":  "Account_ID",
+                                                                            "displayName":  "Account_ID",
+                                                                            "required":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true
+                                                                        },
+                                                                        {
+                                                                            "id":  "Brand_ID",
+                                                                            "displayName":  "Brand_ID",
+                                                                            "required":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Brand_Name",
+                                                                            "displayName":  "Brand_Name",
+                                                                            "required":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Platform",
+                                                                            "displayName":  "Platform",
+                                                                            "required":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Account_Type",
+                                                                            "displayName":  "Account_Type",
+                                                                            "required":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Platform_Account_ID",
+                                                                            "displayName":  "Platform_Account_ID",
+                                                                            "required":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Followers",
+                                                                            "displayName":  "Followers",
+                                                                            "required":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Followers_Gained",
+                                                                            "displayName":  "Followers_Gained",
+                                                                            "required":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Followers_Lost",
+                                                                            "displayName":  "Followers_Lost",
+                                                                            "required":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Impressions",
+                                                                            "displayName":  "Impressions",
+                                                                            "required":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Reach",
+                                                                            "displayName":  "Reach",
+                                                                            "required":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Views",
+                                                                            "displayName":  "Views",
+                                                                            "required":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Likes",
+                                                                            "displayName":  "Likes",
+                                                                            "required":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Comments",
+                                                                            "displayName":  "Comments",
+                                                                            "required":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Shares",
+                                                                            "displayName":  "Shares",
+                                                                            "required":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Saves",
+                                                                            "displayName":  "Saves",
+                                                                            "required":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Engagements",
+                                                                            "displayName":  "Engagements",
+                                                                            "required":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Engagement_Rate",
+                                                                            "displayName":  "Engagement_Rate",
+                                                                            "required":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Posts_Published",
+                                                                            "displayName":  "Posts_Published",
+                                                                            "required":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Video_Views",
+                                                                            "displayName":  "Video_Views",
+                                                                            "required":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Watch_Time",
+                                                                            "displayName":  "Watch_Time",
+                                                                            "required":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Profile_Views",
+                                                                            "displayName":  "Profile_Views",
+                                                                            "required":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Link_Clicks",
+                                                                            "displayName":  "Link_Clicks",
+                                                                            "required":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Data_Status",
+                                                                            "displayName":  "Data_Status",
+                                                                            "required":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Collected_At",
+                                                                            "displayName":  "Collected_At",
+                                                                            "required":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Error_Message",
+                                                                            "displayName":  "Error_Message",
+                                                                            "required":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        }
+                                                                    ]
+                                                     },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "id":  "2ac0afb1-b725-49af-9de7-94f179fbe1ef",
+                      "name":  "Upsert Daily_Metrics",
+                      "type":  "n8n-nodes-base.googleSheets",
+                      "typeVersion":  4.7,
+                      "position":  [
+                                       304,
+                                       128
+                                   ],
+                      "credentials":  "REDACTED_CREDENTIALS",
+                      "onError":  "continueRegularOutput"
+                  },
+                  {
+                      "parameters":  {
+                                         "operation":  "appendOrUpdate",
+                                         "documentId":  "REDACTED_DOCUMENTID",
+                                         "sheetName":  {
+                                                           "__rl":  true,
+                                                           "mode":  "name",
+                                                           "value":  "Account_Master"
+                                                       },
+                                         "columns":  {
+                                                         "mappingMode":  "defineBelow",
+                                                         "value":  {
+                                                                       "Account_ID":  "={{ $(\u0027Collect Results\u0027).item.json.account_id }}",
+                                                                       "Last_Sync":  "={{ $(\u0027Collect Results\u0027).item.json.collected_at }}"
+                                                                   },
+                                                         "matchingColumns":  [
+                                                                                 "Account_ID"
+                                                                             ],
+                                                         "schema":  [
+                                                                        {
+                                                                            "id":  "Account_ID",
+                                                                            "displayName":  "Account_ID",
+                                                                            "required":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true
+                                                                        },
+                                                                        {
+                                                                            "id":  "Last_Sync",
+                                                                            "displayName":  "Last_Sync",
+                                                                            "required":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        }
+                                                                    ]
+                                                     },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "id":  "b8b6ba5d-ea51-4b70-86a7-97b7b3127917",
+                      "name":  "Update Last_Sync",
+                      "type":  "n8n-nodes-base.googleSheets",
+                      "typeVersion":  4.7,
+                      "position":  [
+                                       528,
+                                       128
+                                   ],
+                      "credentials":  "REDACTED_CREDENTIALS",
+                      "onError":  "continueRegularOutput"
+                  },
+                  {
+                      "parameters":  {
+                                         "workflowId":  {
+                                                            "__rl":  true,
+                                                            "mode":  "id",
+                                                            "value":  "XZKerrLcUonAjvCg",
+                                                            "cachedResultName":  "WF7 - Post Discovery / Post Master Sync"
+                                                        },
+                                         "workflowInputs":  {
+                                                                "mappingMode":  "defineBelow",
+                                                                "value":  {
+                                                                              "run_id":  "={{ $json.run_id }}",
+                                                                              "target_date":  "={{ $json.target_date }}",
+                                                                              "account_id":  "={{ $json.account_id }}",
+                                                                              "brand_id":  "={{ $json.brand_id }}",
+                                                                              "brand_name":  "={{ $json.brand_name }}",
+                                                                              "platform":  "={{ $json.platform }}",
+                                                                              "account_type":  "={{ $json.account_type }}",
+                                                                              "platform_account_id":  "={{ $json.platform_account_id }}",
+                                                                              "credential_name":  "REDACTED_CREDENTIAL_NAME",
+                                                                              "timezone":  "={{ $(\u0027Compute Run Context\u0027).first().json.timezone }}"
+                                                                          },
+                                                                "matchingColumns":  [
+
+                                                                                    ],
+                                                                "schema":  [
+                                                                               {
+                                                                                   "id":  "run_id",
+                                                                                   "displayName":  "run_id",
+                                                                                   "required":  false,
+                                                                                   "display":  true,
+                                                                                   "type":  "string",
+                                                                                   "canBeUsedToMatch":  false
+                                                                               },
+                                                                               {
+                                                                                   "id":  "target_date",
+                                                                                   "displayName":  "target_date",
+                                                                                   "required":  false,
+                                                                                   "display":  true,
+                                                                                   "type":  "string",
+                                                                                   "canBeUsedToMatch":  false
+                                                                               },
+                                                                               {
+                                                                                   "id":  "account_id",
+                                                                                   "displayName":  "account_id",
+                                                                                   "required":  false,
+                                                                                   "display":  true,
+                                                                                   "type":  "string",
+                                                                                   "canBeUsedToMatch":  false
+                                                                               },
+                                                                               {
+                                                                                   "id":  "brand_id",
+                                                                                   "displayName":  "brand_id",
+                                                                                   "required":  false,
+                                                                                   "display":  true,
+                                                                                   "type":  "string",
+                                                                                   "canBeUsedToMatch":  false
+                                                                               },
+                                                                               {
+                                                                                   "id":  "brand_name",
+                                                                                   "displayName":  "brand_name",
+                                                                                   "required":  false,
+                                                                                   "display":  true,
+                                                                                   "type":  "string",
+                                                                                   "canBeUsedToMatch":  false
+                                                                               },
+                                                                               {
+                                                                                   "id":  "platform",
+                                                                                   "displayName":  "platform",
+                                                                                   "required":  false,
+                                                                                   "display":  true,
+                                                                                   "type":  "string",
+                                                                                   "canBeUsedToMatch":  false
+                                                                               },
+                                                                               {
+                                                                                   "id":  "account_type",
+                                                                                   "displayName":  "account_type",
+                                                                                   "required":  false,
+                                                                                   "display":  true,
+                                                                                   "type":  "string",
+                                                                                   "canBeUsedToMatch":  false
+                                                                               },
+                                                                               {
+                                                                                   "id":  "platform_account_id",
+                                                                                   "displayName":  "platform_account_id",
+                                                                                   "required":  false,
+                                                                                   "display":  true,
+                                                                                   "type":  "string",
+                                                                                   "canBeUsedToMatch":  false
+                                                                               },
+                                                                               {
+                                                                                   "id":  "credential_name",
+                                                                                   "displayName":  "credential_name",
+                                                                                   "required":  false,
+                                                                                   "display":  true,
+                                                                                   "type":  "string",
+                                                                                   "canBeUsedToMatch":  false
+                                                                               },
+                                                                               {
+                                                                                   "id":  "timezone",
+                                                                                   "displayName":  "timezone",
+                                                                                   "required":  false,
+                                                                                   "display":  true,
+                                                                                   "type":  "string",
+                                                                                   "canBeUsedToMatch":  false
+                                                                               }
+                                                                           ]
+                                                            },
+                                         "mode":  "each",
+                                         "options":  {
+                                                         "waitForSubWorkflow":  true
+                                                     }
+                                     },
+                      "id":  "e5586dcc-1411-4c36-819b-d7d5ead3fafb",
+                      "name":  "Post Discovery",
+                      "type":  "n8n-nodes-base.executeWorkflow",
+                      "typeVersion":  1.3,
+                      "position":  [
+                                       304,
+                                       800
+                                   ],
+                      "onError":  "continueRegularOutput"
+                  },
+                  {
+                      "parameters":  {
+                                         "workflowId":  {
+                                                            "__rl":  true,
+                                                            "mode":  "id",
+                                                            "value":  "AVguL2JmLt6DANP7",
+                                                            "cachedResultName":  "WF5 - Post Metrics Collector"
+                                                        },
+                                         "workflowInputs":  {
+                                                                "mappingMode":  "defineBelow",
+                                                                "value":  {
+                                                                              "run_id":  "={{ $json.run_id }}",
+                                                                              "target_date":  "={{ $json.target_date }}",
+                                                                              "account_id":  "={{ $json.account_id }}",
+                                                                              "brand_id":  "={{ $json.brand_id }}",
+                                                                              "brand_name":  "={{ $json.brand_name }}",
+                                                                              "platform":  "={{ $json.platform }}",
+                                                                              "account_type":  "={{ $json.account_type }}",
+                                                                              "platform_account_id":  "={{ $json.platform_account_id }}",
+                                                                              "credential_name":  "REDACTED_CREDENTIAL_NAME",
+                                                                              "timezone":  "={{ $(\u0027Compute Run Context\u0027).first().json.timezone }}"
+                                                                          },
+                                                                "matchingColumns":  [
+
+                                                                                    ],
+                                                                "schema":  [
+                                                                               {
+                                                                                   "id":  "run_id",
+                                                                                   "displayName":  "run_id",
+                                                                                   "required":  false,
+                                                                                   "display":  true,
+                                                                                   "type":  "string",
+                                                                                   "canBeUsedToMatch":  false
+                                                                               },
+                                                                               {
+                                                                                   "id":  "target_date",
+                                                                                   "displayName":  "target_date",
+                                                                                   "required":  false,
+                                                                                   "display":  true,
+                                                                                   "type":  "string",
+                                                                                   "canBeUsedToMatch":  false
+                                                                               },
+                                                                               {
+                                                                                   "id":  "account_id",
+                                                                                   "displayName":  "account_id",
+                                                                                   "required":  false,
+                                                                                   "display":  true,
+                                                                                   "type":  "string",
+                                                                                   "canBeUsedToMatch":  false
+                                                                               },
+                                                                               {
+                                                                                   "id":  "brand_id",
+                                                                                   "displayName":  "brand_id",
+                                                                                   "required":  false,
+                                                                                   "display":  true,
+                                                                                   "type":  "string",
+                                                                                   "canBeUsedToMatch":  false
+                                                                               },
+                                                                               {
+                                                                                   "id":  "brand_name",
+                                                                                   "displayName":  "brand_name",
+                                                                                   "required":  false,
+                                                                                   "display":  true,
+                                                                                   "type":  "string",
+                                                                                   "canBeUsedToMatch":  false
+                                                                               },
+                                                                               {
+                                                                                   "id":  "platform",
+                                                                                   "displayName":  "platform",
+                                                                                   "required":  false,
+                                                                                   "display":  true,
+                                                                                   "type":  "string",
+                                                                                   "canBeUsedToMatch":  false
+                                                                               },
+                                                                               {
+                                                                                   "id":  "account_type",
+                                                                                   "displayName":  "account_type",
+                                                                                   "required":  false,
+                                                                                   "display":  true,
+                                                                                   "type":  "string",
+                                                                                   "canBeUsedToMatch":  false
+                                                                               },
+                                                                               {
+                                                                                   "id":  "platform_account_id",
+                                                                                   "displayName":  "platform_account_id",
+                                                                                   "required":  false,
+                                                                                   "display":  true,
+                                                                                   "type":  "string",
+                                                                                   "canBeUsedToMatch":  false
+                                                                               },
+                                                                               {
+                                                                                   "id":  "credential_name",
+                                                                                   "displayName":  "credential_name",
+                                                                                   "required":  false,
+                                                                                   "display":  true,
+                                                                                   "type":  "string",
+                                                                                   "canBeUsedToMatch":  false
+                                                                               },
+                                                                               {
+                                                                                   "id":  "timezone",
+                                                                                   "displayName":  "timezone",
+                                                                                   "required":  false,
+                                                                                   "display":  true,
+                                                                                   "type":  "string",
+                                                                                   "canBeUsedToMatch":  false
+                                                                               }
+                                                                           ]
+                                                            },
+                                         "mode":  "each",
+                                         "options":  {
+                                                         "waitForSubWorkflow":  true
+                                                     }
+                                     },
+                      "id":  "be7677e8-e711-46e5-b08d-c900c5c09528",
+                      "name":  "Post Metrics Collector",
+                      "type":  "n8n-nodes-base.executeWorkflow",
+                      "typeVersion":  1.3,
+                      "position":  [
+                                       304,
+                                       320
+                                   ],
+                      "onError":  "continueRegularOutput"
+                  },
+                  {
+                      "parameters":  {
+                                         "operation":  "appendOrUpdate",
+                                         "documentId":  "REDACTED_DOCUMENTID",
+                                         "sheetName":  {
+                                                           "__rl":  true,
+                                                           "mode":  "name",
+                                                           "value":  "Post_Metrics"
+                                                       },
+                                         "columns":  {
+                                                         "mappingMode":  "defineBelow",
+                                                         "value":  {
+                                                                       "Date":  "={{ $json.target_date }}",
+                                                                       "Account_ID":  "={{ $json.account_id }}",
+                                                                       "Brand_ID":  "={{ $json.brand_id }}",
+                                                                       "Platform":  "={{ $json.platform }}",
+                                                                       "Post_ID":  "={{ $json.post_id }}",
+                                                                       "Post_URL":  "={{ $json.post_url }}",
+                                                                       "Published_At":  "={{ $json.published_at }}",
+                                                                       "Content_Type":  "={{ $json.content_type }}",
+                                                                       "Caption":  "={{ $json.caption }}",
+                                                                       "Impressions":  "={{ $json.impressions }}",
+                                                                       "Reach":  "={{ $json.reach }}",
+                                                                       "Views":  "={{ $json.views }}",
+                                                                       "Likes":  "={{ $json.likes }}",
+                                                                       "Comments":  "={{ $json.comments }}",
+                                                                       "Shares":  "={{ $json.shares }}",
+                                                                       "Saves":  "={{ $json.saves }}",
+                                                                       "Engagements":  "={{ $json.engagements }}",
+                                                                       "Engagement_Rate":  "={{ $json.engagement_rate }}",
+                                                                       "Video_Views":  "={{ $json.video_views }}",
+                                                                       "Watch_Time":  "={{ $json.watch_time }}",
+                                                                       "Collected_At":  "={{ $json.collected_at }}",
+                                                                       "Data_Status":  "={{ $json.data_status }}",
+                                                                       "Error_Message":  "={{ $json.error_message }}"
+                                                                   },
+                                                         "matchingColumns":  [
+                                                                                 "Date",
+                                                                                 "Account_ID",
+                                                                                 "Post_ID"
+                                                                             ],
+                                                         "schema":  [
+                                                                        {
+                                                                            "id":  "Date",
+                                                                            "displayName":  "Date",
+                                                                            "required":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true
+                                                                        },
+                                                                        {
+                                                                            "id":  "Account_ID",
+                                                                            "displayName":  "Account_ID",
+                                                                            "required":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true
+                                                                        },
+                                                                        {
+                                                                            "id":  "Brand_ID",
+                                                                            "displayName":  "Brand_ID",
+                                                                            "required":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Platform",
+                                                                            "displayName":  "Platform",
+                                                                            "required":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Post_ID",
+                                                                            "displayName":  "Post_ID",
+                                                                            "required":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true
+                                                                        },
+                                                                        {
+                                                                            "id":  "Post_URL",
+                                                                            "displayName":  "Post_URL",
+                                                                            "required":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Published_At",
+                                                                            "displayName":  "Published_At",
+                                                                            "required":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Content_Type",
+                                                                            "displayName":  "Content_Type",
+                                                                            "required":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Caption",
+                                                                            "displayName":  "Caption",
+                                                                            "required":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Impressions",
+                                                                            "displayName":  "Impressions",
+                                                                            "required":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Reach",
+                                                                            "displayName":  "Reach",
+                                                                            "required":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Views",
+                                                                            "displayName":  "Views",
+                                                                            "required":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Likes",
+                                                                            "displayName":  "Likes",
+                                                                            "required":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Comments",
+                                                                            "displayName":  "Comments",
+                                                                            "required":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Shares",
+                                                                            "displayName":  "Shares",
+                                                                            "required":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Saves",
+                                                                            "displayName":  "Saves",
+                                                                            "required":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Engagements",
+                                                                            "displayName":  "Engagements",
+                                                                            "required":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Engagement_Rate",
+                                                                            "displayName":  "Engagement_Rate",
+                                                                            "required":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Video_Views",
+                                                                            "displayName":  "Video_Views",
+                                                                            "required":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Watch_Time",
+                                                                            "displayName":  "Watch_Time",
+                                                                            "required":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Collected_At",
+                                                                            "displayName":  "Collected_At",
+                                                                            "required":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Data_Status",
+                                                                            "displayName":  "Data_Status",
+                                                                            "required":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Error_Message",
+                                                                            "displayName":  "Error_Message",
+                                                                            "required":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        }
+                                                                    ]
+                                                     },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "id":  "b2968f1d-c4f1-48bb-a2dc-a4fd9d391cc8",
+                      "name":  "Upsert Post_Metrics",
+                      "type":  "n8n-nodes-base.googleSheets",
+                      "typeVersion":  4.7,
+                      "position":  [
+                                       528,
+                                       320
+                                   ],
+                      "credentials":  "REDACTED_CREDENTIALS",
+                      "onError":  "continueRegularOutput"
+                  },
+                  {
+                      "parameters":  {
+                                         "jsCode":  "\nconst results = $(\u0027Collect Results\u0027).all().map(function (i) { return i.json; });\nconst ctx = $(\u0027Compute Run Context\u0027).first().json;\n\nconst logRows = results.map(function (r) {\n  return {\n    run_id: r.run_id,\n    timestamp: r.collected_at || new Date().toISOString(),\n    workflow: \u0027Daily Social Metrics Orchestrator\u0027,\n    account_id: r.account_id,\n    platform: r.platform,\n    operation: r.operation || \u0027daily_metrics\u0027,\n    status: r.data_status,\n    http_status: r.http_status == null ? \u0027\u0027 : r.http_status,\n    execution_id: $execution.id,\n    retry_count: \u0027\u0027,\n    error_message: r.error_message || \u0027\u0027,\n    duration_ms: \u0027\u0027,\n  };\n});\n\nreturn [{\n  json: {\n    run_id: ctx.run_id,\n    target_date: ctx.target_date,\n    records_written: results.length,\n    api_requests: results.length,\n    log_payload: JSON.stringify(logRows),\n    summary_payload: JSON.stringify({ results: results, records_written: results.length, api_requests: results.length }),\n  },\n}];\n"
+                                     },
+                      "id":  "b6ed590a-7962-4b15-9daf-eb1d386c4ccd",
+                      "name":  "Aggregate Run",
+                      "type":  "n8n-nodes-base.code",
+                      "typeVersion":  2,
+                      "position":  [
+                                       304,
+                                       608
+                                   ],
+                      "executeOnce":  true
+                  },
+                  {
+                      "parameters":  {
+                                         "workflowId":  {
+                                                            "__rl":  true,
+                                                            "mode":  "id",
+                                                            "value":  "IjM7dhrLndrC5IIS",
+                                                            "cachedResultName":  "WF6 - Error Handler / Monitoring"
+                                                        },
+                                         "workflowInputs":  {
+                                                                "mappingMode":  "defineBelow",
+                                                                "value":  {
+                                                                              "mode":  "log",
+                                                                              "run_id":  "={{ $json.run_id }}",
+                                                                              "target_date":  "={{ $json.target_date }}",
+                                                                              "spreadsheet_id":  "\u003c__PLACEHOLDER_VALUE__Analytics spreadsheet ID (for API_Log writes)__\u003e",
+                                                                              "payload":  "={{ $json.log_payload }}"
+                                                                          },
+                                                                "matchingColumns":  [
+
+                                                                                    ],
+                                                                "schema":  [
+                                                                               {
+                                                                                   "id":  "mode",
+                                                                                   "displayName":  "mode",
+                                                                                   "required":  false,
+                                                                                   "display":  true,
+                                                                                   "type":  "string",
+                                                                                   "canBeUsedToMatch":  false
+                                                                               },
+                                                                               {
+                                                                                   "id":  "run_id",
+                                                                                   "displayName":  "run_id",
+                                                                                   "required":  false,
+                                                                                   "display":  true,
+                                                                                   "type":  "string",
+                                                                                   "canBeUsedToMatch":  false
+                                                                               },
+                                                                               {
+                                                                                   "id":  "target_date",
+                                                                                   "displayName":  "target_date",
+                                                                                   "required":  false,
+                                                                                   "display":  true,
+                                                                                   "type":  "string",
+                                                                                   "canBeUsedToMatch":  false
+                                                                               },
+                                                                               {
+                                                                                   "id":  "spreadsheet_id",
+                                                                                   "displayName":  "spreadsheet_id",
+                                                                                   "required":  false,
+                                                                                   "display":  true,
+                                                                                   "type":  "string",
+                                                                                   "canBeUsedToMatch":  false
+                                                                               },
+                                                                               {
+                                                                                   "id":  "payload",
+                                                                                   "displayName":  "payload",
+                                                                                   "required":  false,
+                                                                                   "display":  true,
+                                                                                   "type":  "string",
+                                                                                   "canBeUsedToMatch":  false
+                                                                               }
+                                                                           ]
+                                                            },
+                                         "options":  {
+                                                         "waitForSubWorkflow":  true
+                                                     }
+                                     },
+                      "id":  "081792bc-beae-4875-bae3-179225c904e6",
+                      "name":  "Write API_Log",
+                      "type":  "n8n-nodes-base.executeWorkflow",
+                      "typeVersion":  1.3,
+                      "position":  [
+                                       528,
+                                       512
+                                   ],
+                      "onError":  "continueRegularOutput"
+                  },
+                  {
+                      "parameters":  {
+                                         "workflowId":  {
+                                                            "__rl":  true,
+                                                            "mode":  "id",
+                                                            "value":  "IjM7dhrLndrC5IIS",
+                                                            "cachedResultName":  "WF6 - Error Handler / Monitoring"
+                                                        },
+                                         "workflowInputs":  {
+                                                                "mappingMode":  "defineBelow",
+                                                                "value":  {
+                                                                              "mode":  "summary",
+                                                                              "run_id":  "={{ $json.run_id }}",
+                                                                              "target_date":  "={{ $json.target_date }}",
+                                                                              "spreadsheet_id":  "\u003c__PLACEHOLDER_VALUE__Analytics spreadsheet ID (for API_Log writes)__\u003e",
+                                                                              "payload":  "={{ $json.summary_payload }}"
+                                                                          },
+                                                                "matchingColumns":  [
+
+                                                                                    ],
+                                                                "schema":  [
+                                                                               {
+                                                                                   "id":  "mode",
+                                                                                   "displayName":  "mode",
+                                                                                   "required":  false,
+                                                                                   "display":  true,
+                                                                                   "type":  "string",
+                                                                                   "canBeUsedToMatch":  false
+                                                                               },
+                                                                               {
+                                                                                   "id":  "run_id",
+                                                                                   "displayName":  "run_id",
+                                                                                   "required":  false,
+                                                                                   "display":  true,
+                                                                                   "type":  "string",
+                                                                                   "canBeUsedToMatch":  false
+                                                                               },
+                                                                               {
+                                                                                   "id":  "target_date",
+                                                                                   "displayName":  "target_date",
+                                                                                   "required":  false,
+                                                                                   "display":  true,
+                                                                                   "type":  "string",
+                                                                                   "canBeUsedToMatch":  false
+                                                                               },
+                                                                               {
+                                                                                   "id":  "spreadsheet_id",
+                                                                                   "displayName":  "spreadsheet_id",
+                                                                                   "required":  false,
+                                                                                   "display":  true,
+                                                                                   "type":  "string",
+                                                                                   "canBeUsedToMatch":  false
+                                                                               },
+                                                                               {
+                                                                                   "id":  "payload",
+                                                                                   "displayName":  "payload",
+                                                                                   "required":  false,
+                                                                                   "display":  true,
+                                                                                   "type":  "string",
+                                                                                   "canBeUsedToMatch":  false
+                                                                               }
+                                                                           ]
+                                                            },
+                                         "options":  {
+                                                         "waitForSubWorkflow":  true
+                                                     }
+                                     },
+                      "id":  "76a82e46-6d55-486f-93ab-2ecbd74a5c64",
+                      "name":  "Run Summary + Notify",
+                      "type":  "n8n-nodes-base.executeWorkflow",
+                      "typeVersion":  1.3,
+                      "position":  [
+                                       528,
+                                       704
+                                   ],
+                      "onError":  "continueRegularOutput"
+                  }
+              ],
+    "connections":  {
+                        "Daily 02:00 IST":  {
+                                                "main":  [
+                                                             [
+                                                                 {
+                                                                     "node":  "Compute Run Context",
+                                                                     "type":  "main",
+                                                                     "index":  0
+                                                                 }
+                                                             ]
+                                                         ]
+                                            },
+                        "Compute Run Context":  {
+                                                    "main":  [
+                                                                 [
+                                                                     {
+                                                                         "node":  "Read Account_Master",
+                                                                         "type":  "main",
+                                                                         "index":  0
+                                                                     }
+                                                                 ]
+                                                             ]
+                                                },
+                        "Read Account_Master":  {
+                                                    "main":  [
+                                                                 [
+                                                                     {
+                                                                         "node":  "Active = TRUE",
+                                                                         "type":  "main",
+                                                                         "index":  0
+                                                                     }
+                                                                 ]
+                                                             ]
+                                                },
+                        "Active = TRUE":  {
+                                              "main":  [
+                                                           [
+                                                               {
+                                                                   "node":  "Route by Platform",
+                                                                   "type":  "main",
+                                                                   "index":  0
+                                                               }
+                                                           ]
+                                                       ]
+                                          },
+                        "Route by Platform":  {
+                                                  "main":  [
+                                                               [
+                                                                   {
+                                                                       "node":  "Meta Collector",
+                                                                       "type":  "main",
+                                                                       "index":  0
+                                                                   }
+                                                               ],
+                                                               [
+                                                                   {
+                                                                       "node":  "Meta Collector",
+                                                                       "type":  "main",
+                                                                       "index":  0
+                                                                   }
+                                                               ],
+                                                               [
+                                                                   {
+                                                                       "node":  "YouTube Collector",
+                                                                       "type":  "main",
+                                                                       "index":  0
+                                                                   }
+                                                               ],
+                                                               [
+                                                                   {
+                                                                       "node":  "LinkedIn Collector",
+                                                                       "type":  "main",
+                                                                       "index":  0
+                                                                   }
+                                                               ],
+                                                               [
+                                                                   {
+                                                                       "node":  "Unsupported Platform",
+                                                                       "type":  "main",
+                                                                       "index":  0
+                                                                   }
+                                                               ]
+                                                           ]
+                                              },
+                        "Meta Collector":  {
+                                               "main":  [
+                                                            [
+                                                                {
+                                                                    "node":  "Collect Results",
+                                                                    "type":  "main",
+                                                                    "index":  0
+                                                                }
+                                                            ]
+                                                        ]
+                                           },
+                        "YouTube Collector":  {
+                                                  "main":  [
+                                                               [
+                                                                   {
+                                                                       "node":  "Collect Results",
+                                                                       "type":  "main",
+                                                                       "index":  0
+                                                                   }
+                                                               ]
+                                                           ]
+                                              },
+                        "LinkedIn Collector":  {
+                                                   "main":  [
+                                                                [
+                                                                    {
+                                                                        "node":  "Collect Results",
+                                                                        "type":  "main",
+                                                                        "index":  0
+                                                                    }
+                                                                ]
+                                                            ]
+                                               },
+                        "Unsupported Platform":  {
+                                                     "main":  [
+                                                                  [
+                                                                      {
+                                                                          "node":  "Collect Results",
+                                                                          "type":  "main",
+                                                                          "index":  0
+                                                                      }
+                                                                  ]
+                                                              ]
+                                                 },
+                        "Collect Results":  {
+                                                "main":  [
+                                                             [
+                                                                 {
+                                                                     "node":  "Upsert Daily_Metrics",
+                                                                     "type":  "main",
+                                                                     "index":  0
+                                                                 },
+                                                                 {
+                                                                     "node":  "Post Discovery",
+                                                                     "type":  "main",
+                                                                     "index":  0
+                                                                 },
+                                                                 {
+                                                                     "node":  "Aggregate Run",
+                                                                     "type":  "main",
+                                                                     "index":  0
+                                                                 }
+                                                             ]
+                                                         ]
+                                            },
+                        "Upsert Daily_Metrics":  {
+                                                     "main":  [
+                                                                  [
+                                                                      {
+                                                                          "node":  "Update Last_Sync",
+                                                                          "type":  "main",
+                                                                          "index":  0
+                                                                      }
+                                                                  ]
+                                                              ]
+                                                 },
+                        "Post Discovery":  {
+                                               "main":  [
+                                                            [
+                                                                {
+                                                                    "node":  "Post Metrics Collector",
+                                                                    "type":  "main",
+                                                                    "index":  0
+                                                                }
+                                                            ]
+                                                        ]
+                                           },
+                        "Post Metrics Collector":  {
+                                                       "main":  [
+                                                                    [
+                                                                        {
+                                                                            "node":  "Upsert Post_Metrics",
+                                                                            "type":  "main",
+                                                                            "index":  0
+                                                                        }
+                                                                    ]
+                                                                ]
+                                                   },
+                        "Aggregate Run":  {
+                                              "main":  [
+                                                           [
+                                                               {
+                                                                   "node":  "Write API_Log",
+                                                                   "type":  "main",
+                                                                   "index":  0
+                                                               },
+                                                               {
+                                                                   "node":  "Run Summary + Notify",
+                                                                   "type":  "main",
+                                                                   "index":  0
+                                                               }
+                                                           ]
+                                                       ]
+                                          }
+                    },
+    "pinData":  {
+
+                },
+    "nodeGroups":  [
+                       {
+                           "id":  "b47ff675-17e4-46be-ab05-e12820c08d1f",
+                           "name":  "Setup",
+                           "nodeIds":  [
+                                           "c57efb91-3311-48a0-b5fa-5b5a94b2abda"
+                                       ],
+                           "description":  "Generate run_id and compute target date (yesterday, Asia/Kolkata)."
+                       },
+                       {
+                           "id":  "f70099b9-b791-4fdd-b720-94e96b2e17ee",
+                           "name":  "Read \u0026 Filter",
+                           "nodeIds":  [
+                                           "c1078c08-bcba-46a8-a0e1-13fa4e2bcb3b",
+                                           "860ad7c8-588d-41da-bf49-d2d34d76b0a7"
+                                       ],
+                           "description":  "Load Account_Master and keep only Active accounts."
+                       },
+                       {
+                           "id":  "ca030ce2-ea9f-42bb-8a44-9c912ca65710",
+                           "name":  "Collect per account",
+                           "nodeIds":  [
+                                           "8571d353-9ed9-4bdf-b350-d9e64c56ae3c",
+                                           "3e711ab9-4973-4f55-b976-5a3ae44d9b7b",
+                                           "56051e8f-3f0d-4a47-91a6-548eca15916a",
+                                           "df830631-db0e-44ac-bb3f-14c91c07b8a8",
+                                           "05be5949-da8c-4181-9afa-502df0530c31",
+                                           "6abcac0b-7d0d-4543-902a-2df3ac70d18c"
+                                       ],
+                           "description":  "Route each account by platform to its collector, error-isolated, and converge normalized results."
+                       },
+                       {
+                           "id":  "b7e16348-6e84-4d4f-abad-6f235d2d9306",
+                           "name":  "Persist daily metrics",
+                           "nodeIds":  [
+                                           "2ac0afb1-b725-49af-9de7-94f179fbe1ef",
+                                           "b8b6ba5d-ea51-4b70-86a7-97b7b3127917"
+                                       ],
+                           "description":  "Idempotent upsert into Daily_Metrics (Date+Account_ID) and update Last_Sync."
+                       },
+                       {
+                           "id":  "+00 0000 0000a3a-4a75-8c94-712fd2aeefdc",
+                           "name":  "Post metrics",
+                           "nodeIds":  [
+                                           "e5586dcc-1411-4c36-819b-d7d5ead3fafb",
+                                           "be7677e8-e711-46e5-b08d-c900c5c09528",
+                                           "b2968f1d-c4f1-48bb-a2dc-a4fd9d391cc8"
+                                       ],
+                           "description":  "Independent, non-blocking: WF7 discovers posts and syncs Post_Master + 30-day tracking window, then WF5 collects post metrics upserted into Post_"
+                       },
+                       {
+                           "id":  "a9d9a730-a130-43a+00 0000 0000aeb78330",
+                           "name":  "Monitoring",
+                           "nodeIds":  [
+                                           "b6ed590a-7962-4b15-9daf-eb1d386c4ccd",
+                                           "081792bc-beae-4875-bae3-179225c904e6",
+                                           "76a82e46-6d55-486f-93ab-2ecbd74a5c64"
+                                       ],
+                           "description":  "Write API_Log and send a Gmail notification only when failures/partials occur."
+                       }
+                   ],
+    "meta":  {
+                 "templateCredsSetupCompleted":  true,
+                 "instanceId":  "dcb7007d2a9977412bea33d09d5fbf2eca63d0e7f2ce59c7e8d5d882e83728e4"
+             },
+    "active":  false
+}

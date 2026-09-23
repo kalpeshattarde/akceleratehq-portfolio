@@ -1,0 +1,356 @@
+﻿{
+    "nodes":  [
+                  {
+                      "parameters":  {
+                                         "workflowInputs":  {
+                                                                "values":  [
+                                                                               {
+                                                                                   "name":  "mode"
+                                                                               },
+                                                                               {
+                                                                                   "name":  "run_id"
+                                                                               },
+                                                                               {
+                                                                                   "name":  "target_date"
+                                                                               },
+                                                                               {
+                                                                                   "name":  "spreadsheet_id"
+                                                                               },
+                                                                               {
+                                                                                   "name":  "payload"
+                                                                               }
+                                                                           ]
+                                                            }
+                                     },
+                      "id":  "ffdbde+00 0000 0000c-83e8-7a4617b7f4ee",
+                      "name":  "Input",
+                      "type":  "n8n-nodes-base.executeWorkflowTrigger",
+                      "typeVersion":  1.2,
+                      "position":  [
+                                       -432,
+                                       32
+                                   ]
+                  },
+                  {
+                      "parameters":  {
+                                         "conditions":  {
+                                                            "options":  {
+                                                                            "caseSensitive":  false,
+                                                                            "leftValue":  "",
+                                                                            "typeValidation":  "loose",
+                                                                            "version":  2
+                                                                        },
+                                                            "conditions":  [
+                                                                               {
+                                                                                   "id":  "is-log",
+                                                                                   "leftValue":  "={{ $json.mode }}",
+                                                                                   "rightValue":  "log",
+                                                                                   "operator":  {
+                                                                                                    "type":  "string",
+                                                                                                    "operation":  "equals"
+                                                                                                }
+                                                                               }
+                                                                           ],
+                                                            "combinator":  "and"
+                                                        },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "id":  "92f174a6-fd6f-423e-a96d-e6b7f0494511",
+                      "name":  "Is Log Mode?",
+                      "type":  "n8n-nodes-base.if",
+                      "typeVersion":  2.2,
+                      "position":  [
+                                       -208,
+                                       32
+                                   ]
+                  },
+                  {
+                      "parameters":  {
+                                         "jsCode":  "\nconst input = $(\u0027Input\u0027).first().json;\nlet rows = [];\ntry {\n  const parsed = JSON.parse(input.payload || \u0027[]\u0027);\n  rows = Array.isArray(parsed) ? parsed : (parsed \u0026\u0026 Array.isArray(parsed.rows) ? parsed.rows : []);\n} catch (e) {\n  rows = [];\n}\nif (!rows.length) return [];\nreturn rows.map(function (r) {\n  return {\n    json: {\n      Run_ID: input.run_id || r.run_id || null,\n      Timestamp: r.timestamp || new Date().toISOString(),\n      Workflow: r.workflow || null,\n      Account_ID: r.account_id || null,\n      Platform: r.platform || null,\n      Operation: r.operation || null,\n      Status: r.status || r.data_status || null,\n      HTTP_Status: r.http_status == null ? \u0027\u0027 : r.http_status,\n      Execution_ID: r.execution_id || null,\n      Retry_Count: r.retry_count == null ? \u0027\u0027 : r.retry_count,\n      Error_Message: r.error_message || \u0027\u0027,\n      Duration_ms: r.duration_ms == null ? \u0027\u0027 : r.duration_ms,\n    },\n  };\n});\n"
+                                     },
+                      "id":  "a899b7c+00 0000 0000b1d8-4c41dfa3d772",
+                      "name":  "Parse Log Rows",
+                      "type":  "n8n-nodes-base.code",
+                      "typeVersion":  2,
+                      "position":  [
+                                       16,
+                                       -64
+                                   ]
+                  },
+                  {
+                      "parameters":  {
+                                         "operation":  "appendOrUpdate",
+                                         "documentId":  "REDACTED_DOCUMENTID",
+                                         "sheetName":  {
+                                                           "__rl":  true,
+                                                           "mode":  "name",
+                                                           "value":  "API_Log"
+                                                       },
+                                         "columns":  {
+                                                         "mappingMode":  "autoMapInputData",
+                                                         "value":  {
+
+                                                                   },
+                                                         "matchingColumns":  [
+                                                                                 "Run_ID",
+                                                                                 "Account_ID",
+                                                                                 "Operation"
+                                                                             ],
+                                                         "schema":  [
+                                                                        {
+                                                                            "id":  "Run_ID",
+                                                                            "displayName":  "Run_ID",
+                                                                            "required":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true
+                                                                        },
+                                                                        {
+                                                                            "id":  "Timestamp",
+                                                                            "displayName":  "Timestamp",
+                                                                            "required":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Workflow",
+                                                                            "displayName":  "Workflow",
+                                                                            "required":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Account_ID",
+                                                                            "displayName":  "Account_ID",
+                                                                            "required":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true
+                                                                        },
+                                                                        {
+                                                                            "id":  "Platform",
+                                                                            "displayName":  "Platform",
+                                                                            "required":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Operation",
+                                                                            "displayName":  "Operation",
+                                                                            "required":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true
+                                                                        },
+                                                                        {
+                                                                            "id":  "Status",
+                                                                            "displayName":  "Status",
+                                                                            "required":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "HTTP_Status",
+                                                                            "displayName":  "HTTP_Status",
+                                                                            "required":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Execution_ID",
+                                                                            "displayName":  "Execution_ID",
+                                                                            "required":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Retry_Count",
+                                                                            "displayName":  "Retry_Count",
+                                                                            "required":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Error_Message",
+                                                                            "displayName":  "Error_Message",
+                                                                            "required":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Duration_ms",
+                                                                            "displayName":  "Duration_ms",
+                                                                            "required":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        }
+                                                                    ]
+                                                     },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "id":  "c0d57678-0c+00 0000 0000f0f0598d",
+                      "name":  "Write API_Log",
+                      "type":  "n8n-nodes-base.googleSheets",
+                      "typeVersion":  4.7,
+                      "position":  [
+                                       240,
+                                       -64
+                                   ],
+                      "onError":  "continueRegularOutput"
+                  },
+                  {
+                      "parameters":  {
+                                         "jsCode":  "\nconst input = $(\u0027Input\u0027).first().json;\nlet results = [];\nlet recordsWritten = null;\nlet apiRequests = null;\ntry {\n  const parsed = JSON.parse(input.payload || \u0027{}\u0027);\n  results = Array.isArray(parsed.results) ? parsed.results : (Array.isArray(parsed) ? parsed : []);\n  if (parsed \u0026\u0026 parsed.records_written != null) recordsWritten = Number(parsed.records_written);\n  if (parsed \u0026\u0026 parsed.api_requests != null) apiRequests = Number(parsed.api_requests);\n} catch (e) {\n  results = [];\n}\n\nfunction statusOf(r) { return String(r.data_status || r.status || \u0027\u0027).toUpperCase(); }\n\nconst total = results.length;\nconst successful = results.filter(function (r) { return statusOf(r) === \u0027SUCCESS\u0027; }).length;\nconst partial = results.filter(function (r) { return statusOf(r) === \u0027PARTIAL\u0027; }).length;\nconst failed = results.filter(function (r) { return statusOf(r) === \u0027FAILED\u0027; }).length;\n\nconst problems = results.filter(function (r) {\n  const s = statusOf(r);\n  return s === \u0027FAILED\u0027 || s === \u0027PARTIAL\u0027;\n});\n\nlet lines = \u0027\u0027;\nfor (let i = 0; i \u003c problems.length; i++) {\n  const p = problems[i];\n  lines += \u0027- Brand: \u0027 + (p.brand_name || p.brand_id || \u0027n/a\u0027) +\n    \u0027 | Account: \u0027 + (p.account_id || \u0027n/a\u0027) +\n    \u0027 | Platform: \u0027 + (p.platform || \u0027n/a\u0027) +\n    \u0027 | Status: \u0027 + statusOf(p) +\n    \u0027 | HTTP: \u0027 + (p.http_status == null ? \u0027n/a\u0027 : p.http_status) +\n    \u0027 | Error: \u0027 + (p.error_message || \u0027n/a\u0027) +\n    \u0027 | Time: \u0027 + (p.collected_at || new Date().toISOString()) +\n    \u0027\\n\u0027;\n}\n\nconst hasProblems = problems.length \u003e 0;\n\nconst summaryText =\n  \u0027Run ID: \u0027 + (input.run_id || \u0027n/a\u0027) + \u0027\\n\u0027 +\n  \u0027Target date: \u0027 + (input.target_date || \u0027n/a\u0027) + \u0027\\n\u0027 +\n  \u0027Total accounts: \u0027 + total + \u0027\\n\u0027 +\n  \u0027Successful: \u0027 + successful + \u0027\\n\u0027 +\n  \u0027Partial: \u0027 + partial + \u0027\\n\u0027 +\n  \u0027Failed: \u0027 + failed + \u0027\\n\u0027 +\n  \u0027Total API requests: \u0027 + (apiRequests == null ? \u0027n/a\u0027 : apiRequests) + \u0027\\n\u0027 +\n  \u0027Total records written: \u0027 + (recordsWritten == null ? \u0027n/a\u0027 : recordsWritten) + \u0027\\n\\n\u0027 +\n  (hasProblems ? (\u0027Accounts needing attention:\\n\u0027 + lines) : \u0027All accounts succeeded.\u0027);\n\nreturn [{\n  json: {\n    run_id: input.run_id || null,\n    target_date: input.target_date || null,\n    total_accounts: total,\n    successful: successful,\n    partial: partial,\n    failed: failed,\n    total_api_requests: apiRequests,\n    total_records_written: recordsWritten,\n    has_problems: hasProblems,\n    problem_count: problems.length,\n    summary_text: summaryText,\n  },\n}];\n"
+                                     },
+                      "id":  "d87fcd38-d+00 0000 0000b08dd",
+                      "name":  "Compute Summary",
+                      "type":  "n8n-nodes-base.code",
+                      "typeVersion":  2,
+                      "position":  [
+                                       16,
+                                       128
+                                   ]
+                  },
+                  {
+                      "parameters":  {
+                                         "conditions":  {
+                                                            "options":  {
+                                                                            "caseSensitive":  true,
+                                                                            "leftValue":  "",
+                                                                            "typeValidation":  "loose",
+                                                                            "version":  2
+                                                                        },
+                                                            "conditions":  [
+                                                                               {
+                                                                                   "id":  "has-problems",
+                                                                                   "leftValue":  "={{ $json.has_problems }}",
+                                                                                   "rightValue":  true,
+                                                                                   "operator":  {
+                                                                                                    "type":  "boolean",
+                                                                                                    "operation":  "true",
+                                                                                                    "singleValue":  true
+                                                                                                }
+                                                                               }
+                                                                           ],
+                                                            "combinator":  "and"
+                                                        },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "id":  "0d04c09d-222a-44a6-96ab-57aef8791d79",
+                      "name":  "Any Failures?",
+                      "type":  "n8n-nodes-base.if",
+                      "typeVersion":  2.2,
+                      "position":  [
+                                       240,
+                                       128
+                                   ]
+                  },
+                  {
+                      "parameters":  {
+                                         "sendTo":  "\u003c__PLACEHOLDER_VALUE__Notification recipient email__\u003e",
+                                         "subject":  "=[Social Analytics] {{ $json.failed }} failed / {{ $json.partial }} partial - {{ $json.target_date }}",
+                                         "emailType":  "text",
+                                         "message":  "={{ $json.summary_text }}",
+                                         "options":  {
+                                                         "appendAttribution":  false
+                                                     }
+                                     },
+                      "id":  "a0a2118f-+00 0000 0000ae33-5b226b79ea1d",
+                      "name":  "Send Failure Email",
+                      "type":  "n8n-nodes-base.gmail",
+                      "typeVersion":  2.2,
+                      "position":  [
+                                       464,
+                                       128
+                                   ],
+                      "webhookId":  "007b69a5-8ca7-4d73-85bc-fbee72d46665",
+                      "onError":  "continueRegularOutput"
+                  }
+              ],
+    "connections":  {
+                        "Input":  {
+                                      "main":  [
+                                                   [
+                                                       {
+                                                           "node":  "Is Log Mode?",
+                                                           "type":  "main",
+                                                           "index":  0
+                                                       }
+                                                   ]
+                                               ]
+                                  },
+                        "Is Log Mode?":  {
+                                             "main":  [
+                                                          [
+                                                              {
+                                                                  "node":  "Parse Log Rows",
+                                                                  "type":  "main",
+                                                                  "index":  0
+                                                              }
+                                                          ],
+                                                          [
+                                                              {
+                                                                  "node":  "Compute Summary",
+                                                                  "type":  "main",
+                                                                  "index":  0
+                                                              }
+                                                          ]
+                                                      ]
+                                         },
+                        "Parse Log Rows":  {
+                                               "main":  [
+                                                            [
+                                                                {
+                                                                    "node":  "Write API_Log",
+                                                                    "type":  "main",
+                                                                    "index":  0
+                                                                }
+                                                            ]
+                                                        ]
+                                           },
+                        "Compute Summary":  {
+                                                "main":  [
+                                                             [
+                                                                 {
+                                                                     "node":  "Any Failures?",
+                                                                     "type":  "main",
+                                                                     "index":  0
+                                                                 }
+                                                             ]
+                                                         ]
+                                            },
+                        "Any Failures?":  {
+                                              "main":  [
+                                                           [
+                                                               {
+                                                                   "node":  "Send Failure Email",
+                                                                   "type":  "main",
+                                                                   "index":  0
+                                                               }
+                                                           ]
+                                                       ]
+                                          }
+                    },
+    "pinData":  {
+
+                },
+    "meta":  {
+                 "instanceId":  "dcb7007d2a9977412bea33d09d5fbf2eca63d0e7f2ce59c7e8d5d882e83728e4"
+             },
+    "active":  false
+}

@@ -1,0 +1,257 @@
+﻿{
+    "nodes":  [
+                  {
+                      "parameters":  {
+                                         "workflowInputs":  {
+                                                                "values":  [
+                                                                               {
+                                                                                   "name":  "run_id"
+                                                                               },
+                                                                               {
+                                                                                   "name":  "target_date"
+                                                                               },
+                                                                               {
+                                                                                   "name":  "account_id"
+                                                                               },
+                                                                               {
+                                                                                   "name":  "brand_id"
+                                                                               },
+                                                                               {
+                                                                                   "name":  "brand_name"
+                                                                               },
+                                                                               {
+                                                                                   "name":  "platform"
+                                                                               },
+                                                                               {
+                                                                                   "name":  "account_type"
+                                                                               },
+                                                                               {
+                                                                                   "name":  "platform_account_id"
+                                                                               },
+                                                                               {
+                                                                                   "name":  "credential_name"
+                                                                               },
+                                                                               {
+                                                                                   "name":  "timezone"
+                                                                               }
+                                                                           ]
+                                                            }
+                                     },
+                      "id":  "a9ec+00 0000 0000f0d-ab10-5c1a28e8a2ff",
+                      "name":  "Input",
+                      "type":  "n8n-nodes-base.executeWorkflowTrigger",
+                      "typeVersion":  1.2,
+                      "position":  [
+                                       -480,
+                                       144
+                                   ]
+                  },
+                  {
+                      "parameters":  {
+                                         "conditions":  {
+                                                            "options":  {
+                                                                            "caseSensitive":  true,
+                                                                            "leftValue":  "",
+                                                                            "typeValidation":  "loose",
+                                                                            "version":  2
+                                                                        },
+                                                            "conditions":  [
+                                                                               {
+                                                                                   "id":  "has-id",
+                                                                                   "leftValue":  "={{ $json.platform_account_id }}",
+                                                                                   "rightValue":  "",
+                                                                                   "operator":  {
+                                                                                                    "type":  "string",
+                                                                                                    "operation":  "notEmpty"
+                                                                                                }
+                                                                               }
+                                                                           ],
+                                                            "combinator":  "and"
+                                                        },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "id":  "f9c2b+00 0000 0000b-a5eb-4bcf11b7cade",
+                      "name":  "Has Channel ID?",
+                      "type":  "n8n-nodes-base.if",
+                      "typeVersion":  2.2,
+                      "position":  [
+                                       -256,
+                                       144
+                                   ]
+                  },
+                  {
+                      "parameters":  {
+                                         "url":  "https://www.googleapis.com/youtube/v3/channels",
+                                         "authentication":  "predefinedCredentialType",
+                                         "nodeCredentialType":  "REDACTED_NODECREDENTIALTYPE",
+                                         "sendQuery":  true,
+                                         "queryParameters":  {
+                                                                 "parameters":  [
+                                                                                    {
+                                                                                        "name":  "part",
+                                                                                        "value":  "statistics,snippet"
+                                                                                    },
+                                                                                    {
+                                                                                        "name":  "id",
+                                                                                        "value":  "={{ $json.platform_account_id }}"
+                                                                                    }
+                                                                                ]
+                                                             },
+                                         "options":  {
+                                                         "response":  {
+                                                                          "response":  {
+                                                                                           "fullResponse":  true,
+                                                                                           "neverError":  true
+                                                                                       }
+                                                                      }
+                                                     }
+                                     },
+                      "id":  "e4e7b103-ef4b-4359-a945-e6fed31ca871",
+                      "name":  "Channel Stats",
+                      "type":  "n8n-nodes-base.httpRequest",
+                      "typeVersion":  4.5,
+                      "position":  [
+                                       -32,
+                                       48
+                                   ],
+                      "retryOnFail":  true,
+                      "maxTries":  3,
+                      "waitBetweenTries":  2000
+                  },
+                  {
+                      "parameters":  {
+                                         "url":  "https://youtubeanalytics.googleapis.com/v2/reports",
+                                         "authentication":  "predefinedCredentialType",
+                                         "nodeCredentialType":  "REDACTED_NODECREDENTIALTYPE",
+                                         "sendQuery":  true,
+                                         "queryParameters":  {
+                                                                 "parameters":  [
+                                                                                    {
+                                                                                        "name":  "ids",
+                                                                                        "value":  "=channel=={{ $(\u0027Input\u0027).item.json.platform_account_id }}"
+                                                                                    },
+                                                                                    {
+                                                                                        "name":  "startDate",
+                                                                                        "value":  "={{ $(\u0027Input\u0027).item.json.target_date }}"
+                                                                                    },
+                                                                                    {
+                                                                                        "name":  "endDate",
+                                                                                        "value":  "={{ $(\u0027Input\u0027).item.json.target_date }}"
+                                                                                    },
+                                                                                    {
+                                                                                        "name":  "metrics",
+                                                                                        "value":  "views,estimatedMinutesWatched,subscribersGained,subscribersLost,likes,comments,shares"
+                                                                                    }
+                                                                                ]
+                                                             },
+                                         "options":  {
+                                                         "response":  {
+                                                                          "response":  {
+                                                                                           "fullResponse":  true,
+                                                                                           "neverError":  true
+                                                                                       }
+                                                                      }
+                                                     }
+                                     },
+                      "id":  "233013de-23c0-425e-8f17-cdb0c001dac4",
+                      "name":  "Daily Analytics",
+                      "type":  "n8n-nodes-base.httpRequest",
+                      "typeVersion":  4.5,
+                      "position":  [
+                                       192,
+                                       48
+                                   ],
+                      "retryOnFail":  true,
+                      "maxTries":  3,
+                      "waitBetweenTries":  2000
+                  },
+                  {
+                      "parameters":  {
+                                         "jsCode":  "\nconst input = $(\u0027Input\u0027).first().json;\nconst statsResp = $(\u0027Channel Stats\u0027).first().json || {};\nconst anResp = $(\u0027Daily Analytics\u0027).first().json || {};\n\nfunction statusOf(resp) {\n  return resp \u0026\u0026 resp.statusCode != null ? Number(resp.statusCode) : null;\n}\nfunction isOk(s) { return s != null \u0026\u0026 s \u003e= 200 \u0026\u0026 s \u003c 300; }\n\nfunction subCount() {\n  try {\n    const items = statsResp.body \u0026\u0026 Array.isArray(statsResp.body.items) ? statsResp.body.items : [];\n    if (!items.length) return null;\n    const st = items[0].statistics || {};\n    const v = st.subscriberCount;\n    return v == null ? null : Number(v);\n  } catch (e) { return null; }\n}\nfunction analyticVal(name) {\n  try {\n    const body = anResp.body || {};\n    const headers = Array.isArray(body.columnHeaders) ? body.columnHeaders : [];\n    const rows = Array.isArray(body.rows) ? body.rows : [];\n    if (!headers.length || !rows.length) return null;\n    const idx = headers.findIndex(function (h) { return h.name === name; });\n    if (idx \u003c 0) return null;\n    const v = rows[0][idx];\n    return v == null ? null : Number(v);\n  } catch (e) { return null; }\n}\n\nconst sStatus = statusOf(statsResp);\nconst aStatus = statusOf(anResp);\nconst sOk = isOk(sStatus);\nconst aOk = isOk(aStatus);\n\nlet data_status = \u0027FAILED\u0027;\nif (sOk \u0026\u0026 aOk) data_status = \u0027SUCCESS\u0027;\nelse if (sOk || aOk) data_status = \u0027PARTIAL\u0027;\n\nconst errors = [];\nif (!sOk) errors.push(\u0027Channel stats HTTP \u0027 + (sStatus == null ? \u0027no-response\u0027 : sStatus));\nif (!aOk) errors.push(\u0027Analytics HTTP \u0027 + (aStatus == null ? \u0027no-response\u0027 : aStatus));\n\nconst out = {\n  run_id: input.run_id || null,\n  target_date: input.target_date || null,\n  account_id: input.account_id || null,\n  brand_id: input.brand_id || null,\n  brand_name: input.brand_name || null,\n  platform: \u0027YouTube\u0027,\n  account_type: input.account_type || null,\n  platform_account_id: input.platform_account_id || null,\n  followers: subCount(),\n  followers_gained: analyticVal(\u0027subscribersGained\u0027),\n  followers_lost: analyticVal(\u0027subscribersLost\u0027),\n  impressions: null,\n  reach: null,\n  views: analyticVal(\u0027views\u0027),\n  likes: analyticVal(\u0027likes\u0027),\n  comments: analyticVal(\u0027comments\u0027),\n  shares: analyticVal(\u0027shares\u0027),\n  saves: null,\n  engagements: null,\n  engagement_rate: null,\n  posts_published: null,\n  video_views: analyticVal(\u0027views\u0027),\n  watch_time: analyticVal(\u0027estimatedMinutesWatched\u0027),\n  profile_views: null,\n  link_clicks: null,\n  data_status: data_status,\n  collected_at: new Date().toISOString(),\n  error_message: errors.length ? errors.join(\u0027; \u0027) : null,\n  http_status: (sOk \u0026\u0026 aOk) ? 200 : (!sOk ? (sStatus == null ? null : sStatus) : (aStatus == null ? null : aStatus)),\n  operation: \u0027youtube.channel_daily_analytics\u0027,\n};\nreturn [{ json: out }];\n"
+                                     },
+                      "id":  "e6250a+00 0000 0000ba96-f296edd787a3",
+                      "name":  "Normalize YouTube",
+                      "type":  "n8n-nodes-base.code",
+                      "typeVersion":  2,
+                      "position":  [
+                                       416,
+                                       48
+                                   ]
+                  },
+                  {
+                      "parameters":  {
+                                         "jsCode":  "\nconst input = $(\u0027Input\u0027).first().json;\nconst out = {\n  run_id: input.run_id || null,\n  target_date: input.target_date || null,\n  account_id: input.account_id || null,\n  brand_id: input.brand_id || null,\n  brand_name: input.brand_name || null,\n  platform: \u0027YouTube\u0027,\n  account_type: input.account_type || null,\n  platform_account_id: input.platform_account_id || null,\n  followers: null, followers_gained: null, followers_lost: null,\n  impressions: null, reach: null, views: null, likes: null, comments: null,\n  shares: null, saves: null, engagements: null, engagement_rate: null,\n  posts_published: null, video_views: null, watch_time: null,\n  profile_views: null, link_clicks: null,\n  data_status: \u0027FAILED\u0027,\n  collected_at: new Date().toISOString(),\n  error_message: \u0027Missing Platform_Account_ID (YouTube channel id) in Account_Master record; no API call attempted.\u0027,\n  http_status: null,\n  operation: \u0027youtube.validate_input\u0027,\n};\nreturn [{ json: out }];\n"
+                                     },
+                      "id":  "6440e6b9-371e-+00 0000 0000cb279375c904",
+                      "name":  "Missing Channel ID",
+                      "type":  "n8n-nodes-base.code",
+                      "typeVersion":  2,
+                      "position":  [
+                                       -32,
+                                       240
+                                   ]
+                  }
+              ],
+    "connections":  {
+                        "Input":  {
+                                      "main":  [
+                                                   [
+                                                       {
+                                                           "node":  "Has Channel ID?",
+                                                           "type":  "main",
+                                                           "index":  0
+                                                       }
+                                                   ]
+                                               ]
+                                  },
+                        "Has Channel ID?":  {
+                                                "main":  [
+                                                             [
+                                                                 {
+                                                                     "node":  "Channel Stats",
+                                                                     "type":  "main",
+                                                                     "index":  0
+                                                                 }
+                                                             ],
+                                                             [
+                                                                 {
+                                                                     "node":  "Missing Channel ID",
+                                                                     "type":  "main",
+                                                                     "index":  0
+                                                                 }
+                                                             ]
+                                                         ]
+                                            },
+                        "Channel Stats":  {
+                                              "main":  [
+                                                           [
+                                                               {
+                                                                   "node":  "Daily Analytics",
+                                                                   "type":  "main",
+                                                                   "index":  0
+                                                               }
+                                                           ]
+                                                       ]
+                                          },
+                        "Daily Analytics":  {
+                                                "main":  [
+                                                             [
+                                                                 {
+                                                                     "node":  "Normalize YouTube",
+                                                                     "type":  "main",
+                                                                     "index":  0
+                                                                 }
+                                                             ]
+                                                         ]
+                                            }
+                    },
+    "pinData":  {
+
+                },
+    "meta":  {
+                 "instanceId":  "dcb7007d2a9977412bea33d09d5fbf2eca63d0e7f2ce59c7e8d5d882e83728e4"
+             },
+    "active":  false
+}

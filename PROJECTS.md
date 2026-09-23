@@ -9,6 +9,7 @@ These are portfolio workflow exports and architecture examples. Status labels de
 | [MedFlow — Healthcare Practice Operations Automation](healthcare-practice-operations-automation/README.md) | MedFlow | Medical-practice administration | Workflow architecture | Regulated deployment not evidenced | [Case study](healthcare-practice-operations-automation/README.md) |
 | [RestoFlow — Restaurant Revenue & Guest Experience Automation](restaurant-revenue-guest-experience-automation/README.md) | RestoFlow | Hospitality operations | Automation system prototype with demo variant | Deployment and outcomes unverified | [Case study](restaurant-revenue-guest-experience-automation/README.md) |
 | [ZedProp — Property Management & Tenant Service Automation](property-management-tenant-service-automation/README.md) | ZedProp | Property management and tenant services | Automation system with channel demo | Demo implementation; validation required | [Case study](property-management-tenant-service-automation/README.md) |
+| [Wellness Vibe — Learner, Messaging & Social Operations Automation](wellness-vibe-automation/README.md) | Wellness Vibe Automation | Education, learner operations, messaging, and social reporting | Multi-runtime automation system | Sanitized implementation source; validation required | [Case study](wellness-vibe-automation/README.md) |
 
 ## Reading the Projects
 

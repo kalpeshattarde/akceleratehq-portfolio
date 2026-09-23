@@ -1,0 +1,341 @@
+﻿{
+    "nodes":  [
+                  {
+                      "parameters":  {
+                                         "workflowInputs":  {
+                                                                "values":  [
+                                                                               {
+                                                                                   "name":  "run_id"
+                                                                               },
+                                                                               {
+                                                                                   "name":  "target_date"
+                                                                               },
+                                                                               {
+                                                                                   "name":  "account_id"
+                                                                               },
+                                                                               {
+                                                                                   "name":  "brand_id"
+                                                                               },
+                                                                               {
+                                                                                   "name":  "brand_name"
+                                                                               },
+                                                                               {
+                                                                                   "name":  "platform"
+                                                                               },
+                                                                               {
+                                                                                   "name":  "account_type"
+                                                                               },
+                                                                               {
+                                                                                   "name":  "platform_account_id"
+                                                                               },
+                                                                               {
+                                                                                   "name":  "credential_name"
+                                                                               },
+                                                                               {
+                                                                                   "name":  "timezone"
+                                                                               }
+                                                                           ]
+                                                            }
+                                     },
+                      "id":  "efc5b260-95a6-48d2-b31a-955ae258cea3",
+                      "name":  "Input",
+                      "type":  "n8n-nodes-base.executeWorkflowTrigger",
+                      "typeVersion":  1.2,
+                      "position":  [
+                                       -496,
+                                       176
+                                   ]
+                  },
+                  {
+                      "parameters":  {
+                                         "conditions":  {
+                                                            "options":  {
+                                                                            "caseSensitive":  false,
+                                                                            "leftValue":  "",
+                                                                            "typeValidation":  "loose",
+                                                                            "version":  2
+                                                                        },
+                                                            "conditions":  [
+                                                                               {
+                                                                                   "id":  "is-personal",
+                                                                                   "leftValue":  "={{ $json.account_type }}",
+                                                                                   "rightValue":  "Personal",
+                                                                                   "operator":  {
+                                                                                                    "type":  "string",
+                                                                                                    "operation":  "equals"
+                                                                                                }
+                                                                               }
+                                                                           ],
+                                                            "combinator":  "and"
+                                                        },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "id":  "3638ce6f-e+00 0000 0000a5b-10abe5974865",
+                      "name":  "Is Personal?",
+                      "type":  "n8n-nodes-base.if",
+                      "typeVersion":  2.2,
+                      "position":  [
+                                       -272,
+                                       176
+                                   ]
+                  },
+                  {
+                      "parameters":  {
+                                         "jsCode":  "\nconst input = $(\u0027Input\u0027).first().json;\nconst out = {\n  run_id: input.run_id || null,\n  target_date: input.target_date || null,\n  account_id: input.account_id || null,\n  brand_id: input.brand_id || null,\n  brand_name: input.brand_name || null,\n  platform: \u0027LinkedIn\u0027,\n  account_type: input.account_type || \u0027Personal\u0027,\n  platform_account_id: input.platform_account_id || null,\n  followers: null, followers_gained: null, followers_lost: null,\n  impressions: null, reach: null, views: null, likes: null, comments: null,\n  shares: null, saves: null, engagements: null, engagement_rate: null,\n  posts_published: null, video_views: null, watch_time: null,\n  profile_views: null, link_clicks: null,\n  data_status: \u0027PARTIAL\u0027,\n  collected_at: new Date().toISOString(),\n  error_message: \u0027LinkedIn provides no supported public API for personal/creator profile analytics. Only organization/page analytics are available. Metrics recorded as NULL by design (known limitation).\u0027,\n  http_status: null,\n  operation: \u0027linkedin.personal_not_supported\u0027,\n};\nreturn [{ json: out }];\n"
+                                     },
+                      "id":  "9c9c44c8-db82-48ba-86e7-575444b559e8",
+                      "name":  "Normalize Personal (Known PARTIAL)",
+                      "type":  "n8n-nodes-base.code",
+                      "typeVersion":  2,
+                      "position":  [
+                                       -48,
+                                       80
+                                   ]
+                  },
+                  {
+                      "parameters":  {
+                                         "conditions":  {
+                                                            "options":  {
+                                                                            "caseSensitive":  true,
+                                                                            "leftValue":  "",
+                                                                            "typeValidation":  "loose",
+                                                                            "version":  2
+                                                                        },
+                                                            "conditions":  [
+                                                                               {
+                                                                                   "id":  "has-org",
+                                                                                   "leftValue":  "={{ $json.platform_account_id }}",
+                                                                                   "rightValue":  "",
+                                                                                   "operator":  {
+                                                                                                    "type":  "string",
+                                                                                                    "operation":  "notEmpty"
+                                                                                                }
+                                                                               }
+                                                                           ],
+                                                            "combinator":  "and"
+                                                        },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "id":  "156f566a-2723-4d22-8cfb-3eb2ae9a40a4",
+                      "name":  "Has Org URN?",
+                      "type":  "n8n-nodes-base.if",
+                      "typeVersion":  2.2,
+                      "position":  [
+                                       -48,
+                                       272
+                                   ]
+                  },
+                  {
+                      "parameters":  {
+                                         "url":  "https://api.linkedin.com/rest/organizationalEntityFollowerStatistics",
+                                         "authentication":  "predefinedCredentialType",
+                                         "nodeCredentialType":  "REDACTED_NODECREDENTIALTYPE",
+                                         "sendQuery":  true,
+                                         "queryParameters":  {
+                                                                 "parameters":  [
+                                                                                    {
+                                                                                        "name":  "q",
+                                                                                        "value":  "organizationalEntity"
+                                                                                    },
+                                                                                    {
+                                                                                        "name":  "organizationalEntity",
+                                                                                        "value":  "=urn:li:organization:{{ $json.platform_account_id }}"
+                                                                                    }
+                                                                                ]
+                                                             },
+                                         "sendHeaders":  true,
+                                         "headerParameters":  {
+                                                                  "parameters":  [
+                                                                                     {
+                                                                                         "name":  "LinkedIn-Version",
+                                                                                         "value":  "202401"
+                                                                                     },
+                                                                                     {
+                                                                                         "name":  "X-Restli-Protocol-Version",
+                                                                                         "value":  "2.0.0"
+                                                                                     }
+                                                                                 ]
+                                                              },
+                                         "options":  {
+                                                         "response":  {
+                                                                          "response":  {
+                                                                                           "fullResponse":  true,
+                                                                                           "neverError":  true
+                                                                                       }
+                                                                      }
+                                                     }
+                                     },
+                      "id":  "7e6f8082-1eac-4c1b-bf14-01ddbd67f943",
+                      "name":  "Follower Stats",
+                      "type":  "n8n-nodes-base.httpRequest",
+                      "typeVersion":  4.5,
+                      "position":  [
+                                       176,
+                                       176
+                                   ],
+                      "retryOnFail":  true,
+                      "maxTries":  3,
+                      "waitBetweenTries":  2000
+                  },
+                  {
+                      "parameters":  {
+                                         "url":  "https://api.linkedin.com/rest/organizationalEntityShareStatistics",
+                                         "authentication":  "predefinedCredentialType",
+                                         "nodeCredentialType":  "REDACTED_NODECREDENTIALTYPE",
+                                         "sendQuery":  true,
+                                         "queryParameters":  {
+                                                                 "parameters":  [
+                                                                                    {
+                                                                                        "name":  "q",
+                                                                                        "value":  "organizationalEntity"
+                                                                                    },
+                                                                                    {
+                                                                                        "name":  "organizationalEntity",
+                                                                                        "value":  "=urn:li:organization:{{ $(\u0027Input\u0027).item.json.platform_account_id }}"
+                                                                                    }
+                                                                                ]
+                                                             },
+                                         "sendHeaders":  true,
+                                         "headerParameters":  {
+                                                                  "parameters":  [
+                                                                                     {
+                                                                                         "name":  "LinkedIn-Version",
+                                                                                         "value":  "202401"
+                                                                                     },
+                                                                                     {
+                                                                                         "name":  "X-Restli-Protocol-Version",
+                                                                                         "value":  "2.0.0"
+                                                                                     }
+                                                                                 ]
+                                                              },
+                                         "options":  {
+                                                         "response":  {
+                                                                          "response":  {
+                                                                                           "fullResponse":  true,
+                                                                                           "neverError":  true
+                                                                                       }
+                                                                      }
+                                                     }
+                                     },
+                      "id":  "+00 0000 0000d-4026-88a8-a556b728f4d8",
+                      "name":  "Share Stats",
+                      "type":  "n8n-nodes-base.httpRequest",
+                      "typeVersion":  4.5,
+                      "position":  [
+                                       400,
+                                       176
+                                   ],
+                      "retryOnFail":  true,
+                      "maxTries":  3,
+                      "waitBetweenTries":  2000
+                  },
+                  {
+                      "parameters":  {
+                                         "jsCode":  "\nconst input = $(\u0027Input\u0027).first().json;\nconst fResp = $(\u0027Follower Stats\u0027).first().json || {};\nconst sResp = $(\u0027Share Stats\u0027).first().json || {};\n\nfunction statusOf(resp) {\n  return resp \u0026\u0026 resp.statusCode != null ? Number(resp.statusCode) : null;\n}\nfunction isOk(s) { return s != null \u0026\u0026 s \u003e= 200 \u0026\u0026 s \u003c 300; }\nfunction firstEl(resp) {\n  try {\n    const body = resp \u0026\u0026 resp.body ? resp.body : {};\n    const arr = Array.isArray(body.elements) ? body.elements : [];\n    return arr.length ? arr[0] : null;\n  } catch (e) { return null; }\n}\nfunction num(v) { return v == null ? null : Number(v); }\n\nconst fStatus = statusOf(fResp);\nconst sStatus = statusOf(sResp);\nconst fOk = isOk(fStatus);\nconst sOk = isOk(sStatus);\n\nlet followers = null;\ntry {\n  const el = firstEl(fResp);\n  if (el \u0026\u0026 el.followerCounts) {\n    const org = num(el.followerCounts.organicFollowerCount) || 0;\n    const paid = num(el.followerCounts.paidFollowerCount) || 0;\n    followers = org + paid;\n  }\n} catch (e) { followers = null; }\n\nlet stats = {};\ntry {\n  const el = firstEl(sResp);\n  stats = (el \u0026\u0026 el.totalShareStatistics) ? el.totalShareStatistics : {};\n} catch (e) { stats = {}; }\n\nlet data_status = \u0027FAILED\u0027;\nif (fOk \u0026\u0026 sOk) data_status = \u0027SUCCESS\u0027;\nelse if (fOk || sOk) data_status = \u0027PARTIAL\u0027;\n\nconst errors = [];\nif (!fOk) errors.push(\u0027Follower stats HTTP \u0027 + (fStatus == null ? \u0027no-response\u0027 : fStatus));\nif (!sOk) errors.push(\u0027Share stats HTTP \u0027 + (sStatus == null ? \u0027no-response\u0027 : sStatus));\n\nconst out = {\n  run_id: input.run_id || null,\n  target_date: input.target_date || null,\n  account_id: input.account_id || null,\n  brand_id: input.brand_id || null,\n  brand_name: input.brand_name || null,\n  platform: \u0027LinkedIn\u0027,\n  account_type: input.account_type || null,\n  platform_account_id: input.platform_account_id || null,\n  followers: followers,\n  followers_gained: null,\n  followers_lost: null,\n  impressions: num(stats.impressionCount),\n  reach: num(stats.uniqueImpressionsCount),\n  views: null,\n  likes: num(stats.likeCount),\n  comments: num(stats.commentCount),\n  shares: num(stats.shareCount),\n  saves: null,\n  engagements: (function () {\n    const l = num(stats.likeCount) || 0;\n    const c = num(stats.commentCount) || 0;\n    const s = num(stats.shareCount) || 0;\n    const ck = num(stats.clickCount) || 0;\n    const any = stats.likeCount != null || stats.commentCount != null || stats.shareCount != null || stats.clickCount != null;\n    return any ? (l + c + s + ck) : null;\n  })(),\n  engagement_rate: (stats.engagement != null ? Number(stats.engagement) : null),\n  posts_published: null,\n  video_views: null,\n  watch_time: null,\n  profile_views: null,\n  link_clicks: num(stats.clickCount),\n  data_status: data_status,\n  collected_at: new Date().toISOString(),\n  error_message: errors.length ? errors.join(\u0027; \u0027) : null,\n  http_status: (fOk \u0026\u0026 sOk) ? 200 : (!fOk ? (fStatus == null ? null : fStatus) : (sStatus == null ? null : sStatus)),\n  operation: \u0027linkedin.org_daily_statistics\u0027,\n};\nreturn [{ json: out }];\n"
+                                     },
+                      "id":  "15f5c811-9e7a-49eb-a2b8-b7a12ab45bc7",
+                      "name":  "Normalize Org",
+                      "type":  "n8n-nodes-base.code",
+                      "typeVersion":  2,
+                      "position":  [
+                                       624,
+                                       176
+                                   ]
+                  },
+                  {
+                      "parameters":  {
+                                         "jsCode":  "\nconst input = $(\u0027Input\u0027).first().json;\nconst out = {\n  run_id: input.run_id || null,\n  target_date: input.target_date || null,\n  account_id: input.account_id || null,\n  brand_id: input.brand_id || null,\n  brand_name: input.brand_name || null,\n  platform: \u0027LinkedIn\u0027,\n  account_type: input.account_type || null,\n  platform_account_id: input.platform_account_id || null,\n  followers: null, followers_gained: null, followers_lost: null,\n  impressions: null, reach: null, views: null, likes: null, comments: null,\n  shares: null, saves: null, engagements: null, engagement_rate: null,\n  posts_published: null, video_views: null, watch_time: null,\n  profile_views: null, link_clicks: null,\n  data_status: \u0027FAILED\u0027,\n  collected_at: new Date().toISOString(),\n  error_message: \u0027Missing Platform_Account_ID (LinkedIn organization URN id) for org/page account; no API call attempted.\u0027,\n  http_status: null,\n  operation: \u0027linkedin.validate_input\u0027,\n};\nreturn [{ json: out }];\n"
+                                     },
+                      "id":  "694763f5-d786-469d-abde-7a4208fdd8d9",
+                      "name":  "Missing Org URN",
+                      "type":  "n8n-nodes-base.code",
+                      "typeVersion":  2,
+                      "position":  [
+                                       176,
+                                       368
+                                   ]
+                  }
+              ],
+    "connections":  {
+                        "Input":  {
+                                      "main":  [
+                                                   [
+                                                       {
+                                                           "node":  "Is Personal?",
+                                                           "type":  "main",
+                                                           "index":  0
+                                                       }
+                                                   ]
+                                               ]
+                                  },
+                        "Is Personal?":  {
+                                             "main":  [
+                                                          [
+                                                              {
+                                                                  "node":  "Normalize Personal (Known PARTIAL)",
+                                                                  "type":  "main",
+                                                                  "index":  0
+                                                              }
+                                                          ],
+                                                          [
+                                                              {
+                                                                  "node":  "Has Org URN?",
+                                                                  "type":  "main",
+                                                                  "index":  0
+                                                              }
+                                                          ]
+                                                      ]
+                                         },
+                        "Has Org URN?":  {
+                                             "main":  [
+                                                          [
+                                                              {
+                                                                  "node":  "Follower Stats",
+                                                                  "type":  "main",
+                                                                  "index":  0
+                                                              }
+                                                          ],
+                                                          [
+                                                              {
+                                                                  "node":  "Missing Org URN",
+                                                                  "type":  "main",
+                                                                  "index":  0
+                                                              }
+                                                          ]
+                                                      ]
+                                         },
+                        "Follower Stats":  {
+                                               "main":  [
+                                                            [
+                                                                {
+                                                                    "node":  "Share Stats",
+                                                                    "type":  "main",
+                                                                    "index":  0
+                                                                }
+                                                            ]
+                                                        ]
+                                           },
+                        "Share Stats":  {
+                                            "main":  [
+                                                         [
+                                                             {
+                                                                 "node":  "Normalize Org",
+                                                                 "type":  "main",
+                                                                 "index":  0
+                                                             }
+                                                         ]
+                                                     ]
+                                        }
+                    },
+    "pinData":  {
+
+                },
+    "meta":  {
+                 "instanceId":  "dcb7007d2a9977412bea33d09d5fbf2eca63d0e7f2ce59c7e8d5d882e83728e4"
+             },
+    "active":  false
+}

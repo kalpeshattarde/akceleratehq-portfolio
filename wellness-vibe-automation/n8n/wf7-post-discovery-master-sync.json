@@ -1,0 +1,951 @@
+﻿{
+    "nodes":  [
+                  {
+                      "parameters":  {
+                                         "workflowInputs":  {
+                                                                "values":  [
+                                                                               {
+                                                                                   "name":  "run_id"
+                                                                               },
+                                                                               {
+                                                                                   "name":  "target_date"
+                                                                               },
+                                                                               {
+                                                                                   "name":  "account_id"
+                                                                               },
+                                                                               {
+                                                                                   "name":  "brand_id"
+                                                                               },
+                                                                               {
+                                                                                   "name":  "brand_name"
+                                                                               },
+                                                                               {
+                                                                                   "name":  "platform"
+                                                                               },
+                                                                               {
+                                                                                   "name":  "account_type"
+                                                                               },
+                                                                               {
+                                                                                   "name":  "platform_account_id"
+                                                                               },
+                                                                               {
+                                                                                   "name":  "credential_name"
+                                                                               },
+                                                                               {
+                                                                                   "name":  "timezone"
+                                                                               }
+                                                                           ]
+                                                            }
+                                     },
+                      "id":  "5224bde5-dd92-4ea4-a86f-+00 0000 0000bf",
+                      "name":  "Input",
+                      "type":  "n8n-nodes-base.executeWorkflowTrigger",
+                      "typeVersion":  1.2,
+                      "position":  [
+                                       0,
+                                       512
+                                   ]
+                  },
+                  {
+                      "parameters":  {
+                                         "conditions":  {
+                                                            "options":  {
+                                                                            "caseSensitive":  true,
+                                                                            "leftValue":  "",
+                                                                            "typeValidation":  "loose",
+                                                                            "version":  2
+                                                                        },
+                                                            "conditions":  [
+                                                                               {
+                                                                                   "id":  "has-id",
+                                                                                   "leftValue":  "={{ $json.platform_account_id }}",
+                                                                                   "rightValue":  "",
+                                                                                   "operator":  {
+                                                                                                    "type":  "string",
+                                                                                                    "operation":  "notEmpty"
+                                                                                                }
+                                                                               }
+                                                                           ],
+                                                            "combinator":  "and"
+                                                        },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "id":  "17d970e1-aaf3-40c9-970d-011f230431b5",
+                      "name":  "Has Account ID?",
+                      "type":  "n8n-nodes-base.if",
+                      "typeVersion":  2.2,
+                      "position":  [
+                                       224,
+                                       512
+                                   ]
+                  },
+                  {
+                      "parameters":  {
+                                         "rules":  {
+                                                       "values":  [
+                                                                      {
+                                                                          "conditions":  {
+                                                                                             "options":  {
+                                                                                                             "caseSensitive":  false,
+                                                                                                             "leftValue":  "",
+                                                                                                             "typeValidation":  "loose",
+                                                                                                             "version":  1
+                                                                                                         },
+                                                                                             "conditions":  [
+                                                                                                                {
+                                                                                                                    "leftValue":  "={{ $json.platform }}",
+                                                                                                                    "rightValue":  "Instagram",
+                                                                                                                    "operator":  {
+                                                                                                                                     "type":  "string",
+                                                                                                                                     "operation":  "equals"
+                                                                                                                                 }
+                                                                                                                }
+                                                                                                            ],
+                                                                                             "combinator":  "and"
+                                                                                         },
+                                                                          "renameOutput":  true,
+                                                                          "outputKey":  "instagram"
+                                                                      },
+                                                                      {
+                                                                          "conditions":  {
+                                                                                             "options":  {
+                                                                                                             "caseSensitive":  false,
+                                                                                                             "leftValue":  "",
+                                                                                                             "typeValidation":  "loose",
+                                                                                                             "version":  1
+                                                                                                         },
+                                                                                             "conditions":  [
+                                                                                                                {
+                                                                                                                    "leftValue":  "={{ $json.platform }}",
+                                                                                                                    "rightValue":  "Facebook",
+                                                                                                                    "operator":  {
+                                                                                                                                     "type":  "string",
+                                                                                                                                     "operation":  "equals"
+                                                                                                                                 }
+                                                                                                                }
+                                                                                                            ],
+                                                                                             "combinator":  "and"
+                                                                                         },
+                                                                          "renameOutput":  true,
+                                                                          "outputKey":  "facebook"
+                                                                      },
+                                                                      {
+                                                                          "conditions":  {
+                                                                                             "options":  {
+                                                                                                             "caseSensitive":  false,
+                                                                                                             "leftValue":  "",
+                                                                                                             "typeValidation":  "loose",
+                                                                                                             "version":  1
+                                                                                                         },
+                                                                                             "conditions":  [
+                                                                                                                {
+                                                                                                                    "leftValue":  "={{ $json.platform }}",
+                                                                                                                    "rightValue":  "YouTube",
+                                                                                                                    "operator":  {
+                                                                                                                                     "type":  "string",
+                                                                                                                                     "operation":  "equals"
+                                                                                                                                 }
+                                                                                                                }
+                                                                                                            ],
+                                                                                             "combinator":  "and"
+                                                                                         },
+                                                                          "renameOutput":  true,
+                                                                          "outputKey":  "youtube"
+                                                                      },
+                                                                      {
+                                                                          "conditions":  {
+                                                                                             "options":  {
+                                                                                                             "caseSensitive":  false,
+                                                                                                             "leftValue":  "",
+                                                                                                             "typeValidation":  "loose",
+                                                                                                             "version":  1
+                                                                                                         },
+                                                                                             "conditions":  [
+                                                                                                                {
+                                                                                                                    "leftValue":  "={{ $json.platform }}",
+                                                                                                                    "rightValue":  "LinkedIn",
+                                                                                                                    "operator":  {
+                                                                                                                                     "type":  "string",
+                                                                                                                                     "operation":  "equals"
+                                                                                                                                 }
+                                                                                                                }
+                                                                                                            ],
+                                                                                             "combinator":  "and"
+                                                                                         },
+                                                                          "renameOutput":  true,
+                                                                          "outputKey":  "linkedin"
+                                                                      }
+                                                                  ]
+                                                   },
+                                         "options":  {
+                                                         "fallbackOutput":  "extra",
+                                                         "renameFallbackOutput":  "unsupported"
+                                                     }
+                                     },
+                      "id":  "7ee183ac-a284-4eb5-bbe5-468a2bb0baba",
+                      "name":  "Route by Platform",
+                      "type":  "n8n-nodes-base.switch",
+                      "typeVersion":  3.4,
+                      "position":  [
+                                       448,
+                                       336
+                                   ]
+                  },
+                  {
+                      "parameters":  {
+                                         "url":  "=https://graph.facebook.com/v21.0/{{ $json.platform_account_id }}/media",
+                                         "authentication":  "predefinedCredentialType",
+                                         "nodeCredentialType":  "REDACTED_NODECREDENTIALTYPE",
+                                         "sendQuery":  true,
+                                         "queryParameters":  {
+                                                                 "parameters":  [
+                                                                                    {
+                                                                                        "name":  "fields",
+                                                                                        "value":  "id,caption,media_type,permalink,timestamp"
+                                                                                    },
+                                                                                    {
+                                                                                        "name":  "limit",
+                                                                                        "value":  "25"
+                                                                                    }
+                                                                                ]
+                                                             },
+                                         "options":  {
+                                                         "response":  {
+                                                                          "response":  {
+                                                                                           "fullResponse":  true,
+                                                                                           "neverError":  true
+                                                                                       }
+                                                                      },
+                                                         "pagination":  {
+                                                                            "pagination":  {
+                                                                                               "paginationMode":  "responseContainsNextURL",
+                                                                                               "nextURL":  "={{ $response.body.paging?.next }}",
+                                                                                               "paginationCompleteWhen":  "other",
+                                                                                               "completeExpression":  "={{ !$response.body.paging?.next }}",
+                                                                                               "limitPagesFetched":  true,
+                                                                                               "maxRequests":  10
+                                                                                           }
+                                                                        }
+                                                     }
+                                     },
+                      "id":  "268162c2-c7bf-4812-9d67-cd+00 0000 0000b",
+                      "name":  "IG Media",
+                      "type":  "n8n-nodes-base.httpRequest",
+                      "typeVersion":  4.5,
+                      "position":  [
+                                       672,
+                                       0
+                                   ],
+                      "retryOnFail":  true
+                  },
+                  {
+                      "parameters":  {
+                                         "jsCode":  "\nconst items = $(\u0027IG Media\u0027).all();\nconst rows = [];\nfor (let i = 0; i \u003c items.length; i++) {\n  const resp = items[i].json || {};\n  const status = resp.statusCode != null ? Number(resp.statusCode) : null;\n  const ok = status != null \u0026\u0026 status \u003e= 200 \u0026\u0026 status \u003c 300;\n  const body = resp.body || {};\n  const data = Array.isArray(body.data) ? body.data : [];\n  if (!ok) continue;\n  for (let j = 0; j \u003c data.length; j++) {\n    const p = data[j];\n    if (!p || !p.id) continue;\n    rows.push({ json: {\n      platform: \u0027Instagram\u0027,\n      platform_post_id: String(p.id),\n      post_url: p.permalink || \u0027\u0027,\n      published_at: p.timestamp || \u0027\u0027,\n      content_type: p.media_type || \u0027\u0027,\n      caption: p.caption || \u0027\u0027,\n    }});\n  }\n}\nreturn rows;\n"
+                                     },
+                      "id":  "c40a14c3-b862-419a-8709-1a9e9cd19afe",
+                      "name":  "Normalize IG",
+                      "type":  "n8n-nodes-base.code",
+                      "typeVersion":  2,
+                      "position":  [
+                                       896,
+                                       0
+                                   ],
+                      "alwaysOutputData":  true
+                  },
+                  {
+                      "parameters":  {
+                                         "jsCode":  "\nconst rows = $input.all().map(i =\u003e i.json).filter(p =\u003e p \u0026\u0026 p.platform_post_id);\nif (!rows.length) return [{ json: { __no_discovery: true } }];\nreturn rows.map(r =\u003e ({ json: r }));\n"
+                                     },
+                      "id":  "354cb09d-272f-40d0-9cd2-55d9c420fc4e",
+                      "name":  "Collect Discovered",
+                      "type":  "n8n-nodes-base.code",
+                      "typeVersion":  2,
+                      "position":  [
+                                       1120,
+                                       272
+                                   ],
+                      "executeOnce":  true,
+                      "alwaysOutputData":  true
+                  },
+                  {
+                      "parameters":  {
+                                         "url":  "=https://graph.facebook.com/v21.0/{{ $json.platform_account_id }}/posts",
+                                         "authentication":  "predefinedCredentialType",
+                                         "nodeCredentialType":  "REDACTED_NODECREDENTIALTYPE",
+                                         "sendQuery":  true,
+                                         "queryParameters":  {
+                                                                 "parameters":  [
+                                                                                    {
+                                                                                        "name":  "fields",
+                                                                                        "value":  "id,message,permalink_url,created_time"
+                                                                                    },
+                                                                                    {
+                                                                                        "name":  "limit",
+                                                                                        "value":  "25"
+                                                                                    }
+                                                                                ]
+                                                             },
+                                         "options":  {
+                                                         "response":  {
+                                                                          "response":  {
+                                                                                           "fullResponse":  true,
+                                                                                           "neverError":  true
+                                                                                       }
+                                                                      },
+                                                         "pagination":  {
+                                                                            "pagination":  {
+                                                                                               "paginationMode":  "responseContainsNextURL",
+                                                                                               "nextURL":  "={{ $response.body.paging?.next }}",
+                                                                                               "paginationCompleteWhen":  "other",
+                                                                                               "completeExpression":  "={{ !$response.body.paging?.next }}",
+                                                                                               "limitPagesFetched":  true,
+                                                                                               "maxRequests":  10
+                                                                                           }
+                                                                        }
+                                                     }
+                                     },
+                      "id":  "ab04eed9-cbad-4161-a312-29f1e0b90516",
+                      "name":  "FB Posts",
+                      "type":  "n8n-nodes-base.httpRequest",
+                      "typeVersion":  4.5,
+                      "position":  [
+                                       672,
+                                       192
+                                   ],
+                      "retryOnFail":  true
+                  },
+                  {
+                      "parameters":  {
+                                         "jsCode":  "\nconst items = $(\u0027FB Posts\u0027).all();\nconst rows = [];\nfor (let i = 0; i \u003c items.length; i++) {\n  const resp = items[i].json || {};\n  const status = resp.statusCode != null ? Number(resp.statusCode) : null;\n  const ok = status != null \u0026\u0026 status \u003e= 200 \u0026\u0026 status \u003c 300;\n  const body = resp.body || {};\n  const data = Array.isArray(body.data) ? body.data : [];\n  if (!ok) continue;\n  for (let j = 0; j \u003c data.length; j++) {\n    const p = data[j];\n    if (!p || !p.id) continue;\n    rows.push({ json: {\n      platform: \u0027Facebook\u0027,\n      platform_post_id: String(p.id),\n      post_url: p.permalink_url || \u0027\u0027,\n      published_at: p.created_time || \u0027\u0027,\n      content_type: \u0027post\u0027,\n      caption: p.message || \u0027\u0027,\n    }});\n  }\n}\nreturn rows;\n"
+                                     },
+                      "id":  "8f142aba-0c+00 0000 0000f257f4dd5150",
+                      "name":  "Normalize FB",
+                      "type":  "n8n-nodes-base.code",
+                      "typeVersion":  2,
+                      "position":  [
+                                       896,
+                                       192
+                                   ],
+                      "alwaysOutputData":  true
+                  },
+                  {
+                      "parameters":  {
+                                         "url":  "https://www.googleapis.com/youtube/v3/search",
+                                         "authentication":  "predefinedCredentialType",
+                                         "nodeCredentialType":  "REDACTED_NODECREDENTIALTYPE",
+                                         "sendQuery":  true,
+                                         "queryParameters":  {
+                                                                 "parameters":  [
+                                                                                    {
+                                                                                        "name":  "part",
+                                                                                        "value":  "snippet"
+                                                                                    },
+                                                                                    {
+                                                                                        "name":  "channelId",
+                                                                                        "value":  "={{ $json.platform_account_id }}"
+                                                                                    },
+                                                                                    {
+                                                                                        "name":  "order",
+                                                                                        "value":  "date"
+                                                                                    },
+                                                                                    {
+                                                                                        "name":  "type",
+                                                                                        "value":  "video"
+                                                                                    },
+                                                                                    {
+                                                                                        "name":  "maxResults",
+                                                                                        "value":  "25"
+                                                                                    }
+                                                                                ]
+                                                             },
+                                         "options":  {
+                                                         "response":  {
+                                                                          "response":  {
+                                                                                           "fullResponse":  true,
+                                                                                           "neverError":  true
+                                                                                       }
+                                                                      },
+                                                         "pagination":  {
+                                                                            "pagination":  {
+                                                                                               "parameters":  {
+                                                                                                                  "parameters":  [
+                                                                                                                                     {
+                                                                                                                                         "name":  "pageToken",
+                                                                                                                                         "value":  "={{ $response.body.nextPageToken }}"
+                                                                                                                                     }
+                                                                                                                                 ]
+                                                                                                              },
+                                                                                               "paginationCompleteWhen":  "other",
+                                                                                               "completeExpression":  "={{ !$response.body.nextPageToken }}",
+                                                                                               "limitPagesFetched":  true,
+                                                                                               "maxRequests":  5
+                                                                                           }
+                                                                        }
+                                                     }
+                                     },
+                      "id":  "cf125b9e-6865-48d2-84ef-31b81bea037b",
+                      "name":  "YT Recent Videos",
+                      "type":  "n8n-nodes-base.httpRequest",
+                      "typeVersion":  4.5,
+                      "position":  [
+                                       672,
+                                       384
+                                   ],
+                      "retryOnFail":  true,
+                      "credentials":  "REDACTED_CREDENTIALS"
+                  },
+                  {
+                      "parameters":  {
+                                         "jsCode":  "\nconst items = $(\u0027YT Recent Videos\u0027).all();\nconst rows = [];\nfor (let i = 0; i \u003c items.length; i++) {\n  const resp = items[i].json || {};\n  const status = resp.statusCode != null ? Number(resp.statusCode) : null;\n  const ok = status != null \u0026\u0026 status \u003e= 200 \u0026\u0026 status \u003c 300;\n  const body = resp.body || {};\n  const data = Array.isArray(body.items) ? body.items : [];\n  if (!ok) continue;\n  for (let j = 0; j \u003c data.length; j++) {\n    const v = data[j];\n    const vid = (v.id \u0026\u0026 v.id.videoId) ? v.id.videoId : null;\n    if (!vid) continue;\n    const sn = v.snippet || {};\n    rows.push({ json: {\n      platform: \u0027YouTube\u0027,\n      platform_post_id: String(vid),\n      post_url: \u0027https://www.youtube.com/watch?v=\u0027 + vid,\n      published_at: sn.publishedAt || \u0027\u0027,\n      content_type: \u0027video\u0027,\n      caption: sn.title || \u0027\u0027,\n    }});\n  }\n}\nreturn rows;\n"
+                                     },
+                      "id":  "0572f+00 0000 0000b046-034e31e15940",
+                      "name":  "Normalize YT",
+                      "type":  "n8n-nodes-base.code",
+                      "typeVersion":  2,
+                      "position":  [
+                                       896,
+                                       384
+                                   ],
+                      "alwaysOutputData":  true
+                  },
+                  {
+                      "parameters":  {
+                                         "url":  "https://api.linkedin.com/rest/posts",
+                                         "authentication":  "predefinedCredentialType",
+                                         "nodeCredentialType":  "REDACTED_NODECREDENTIALTYPE",
+                                         "sendQuery":  true,
+                                         "queryParameters":  {
+                                                                 "parameters":  [
+                                                                                    {
+                                                                                        "name":  "q",
+                                                                                        "value":  "author"
+                                                                                    },
+                                                                                    {
+                                                                                        "name":  "author",
+                                                                                        "value":  "=urn:li:organization:{{ $json.platform_account_id }}"
+                                                                                    },
+                                                                                    {
+                                                                                        "name":  "count",
+                                                                                        "value":  "25"
+                                                                                    }
+                                                                                ]
+                                                             },
+                                         "sendHeaders":  true,
+                                         "headerParameters":  {
+                                                                  "parameters":  [
+                                                                                     {
+                                                                                         "name":  "LinkedIn-Version",
+                                                                                         "value":  "202401"
+                                                                                     },
+                                                                                     {
+                                                                                         "name":  "X-Restli-Protocol-Version",
+                                                                                         "value":  "2.0.0"
+                                                                                     }
+                                                                                 ]
+                                                              },
+                                         "options":  {
+                                                         "response":  {
+                                                                          "response":  {
+                                                                                           "fullResponse":  true,
+                                                                                           "neverError":  true
+                                                                                       }
+                                                                      }
+                                                     }
+                                     },
+                      "id":  "72fd1aac-008b-42e9-b398-9adc2b2bf0ce",
+                      "name":  "LI Org Posts",
+                      "type":  "n8n-nodes-base.httpRequest",
+                      "typeVersion":  4.5,
+                      "position":  [
+                                       672,
+                                       576
+                                   ],
+                      "retryOnFail":  true
+                  },
+                  {
+                      "parameters":  {
+                                         "jsCode":  "\nconst input = $(\u0027Input\u0027).first().json;\n// LinkedIn personal/creator has no supported post-discovery API -\u003e emit nothing.\nif (String(input.account_type || \u0027\u0027).toLowerCase() === \u0027personal\u0027) {\n  return [];\n}\nconst items = $(\u0027LI Org Posts\u0027).all();\nconst rows = [];\nfor (let i = 0; i \u003c items.length; i++) {\n  const resp = items[i].json || {};\n  const status = resp.statusCode != null ? Number(resp.statusCode) : null;\n  const ok = status != null \u0026\u0026 status \u003e= 200 \u0026\u0026 status \u003c 300;\n  const body = resp.body || {};\n  const data = Array.isArray(body.elements) ? body.elements : [];\n  if (!ok) continue;\n  for (let j = 0; j \u003c data.length; j++) {\n    const p = data[j];\n    if (!p || !p.id) continue;\n    rows.push({ json: {\n      platform: \u0027LinkedIn\u0027,\n      platform_post_id: String(p.id),\n      post_url: \u0027\u0027,\n      published_at: p.createdAt ? new Date(Number(p.createdAt)).toISOString() : \u0027\u0027,\n      content_type: \u0027post\u0027,\n      caption: p.commentary || \u0027\u0027,\n    }});\n  }\n}\nreturn rows;\n"
+                                     },
+                      "id":  "4743c7f3-97e6-46da-b2d7-806f4bede250",
+                      "name":  "Normalize LI",
+                      "type":  "n8n-nodes-base.code",
+                      "typeVersion":  2,
+                      "position":  [
+                                       896,
+                                       576
+                                   ],
+                      "alwaysOutputData":  true
+                  },
+                  {
+                      "parameters":  {
+                                         "jsCode":  "return [{ json: { __no_discovery: true } }];"
+                                     },
+                      "id":  "4857db38-f98f-413c-adea-f90b99876cc5",
+                      "name":  "Unsupported Platform",
+                      "type":  "n8n-nodes-base.code",
+                      "typeVersion":  2,
+                      "position":  [
+                                       896,
+                                       768
+                                   ],
+                      "alwaysOutputData":  true
+                  },
+                  {
+                      "parameters":  {
+                                         "jsCode":  "\nconst input = $(\u0027Input\u0027).first().json;\nreturn [{ json: {\n  run_id: input.run_id || null,\n  target_date: input.target_date || null,\n  account_id: input.account_id || null,\n  platform: input.platform || null,\n  data_status: \u0027FAILED\u0027,\n  error_message: \u0027Missing Platform_Account_ID; no post discovery attempted.\u0027,\n  tracked_posts: 0,\n}}];\n"
+                                     },
+                      "id":  "d8bb4d7f-abb5-4b2f-83bf-088fc8388d71",
+                      "name":  "Missing Account ID",
+                      "type":  "n8n-nodes-base.code",
+                      "typeVersion":  2,
+                      "position":  [
+                                       448,
+                                       624
+                                   ]
+                  },
+                  {
+                      "parameters":  {
+                                         "documentId":  "REDACTED_DOCUMENTID",
+                                         "sheetName":  {
+                                                           "__rl":  true,
+                                                           "mode":  "name",
+                                                           "value":  "Post_Master"
+                                                       },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "id":  "4ceb8641-a6b6-407e-89ff-e2ae3343be7e",
+                      "name":  "Read Post_Master",
+                      "type":  "n8n-nodes-base.googleSheets",
+                      "typeVersion":  4.7,
+                      "position":  [
+                                       1344,
+                                       272
+                                   ],
+                      "executeOnce":  true,
+                      "alwaysOutputData":  true,
+                      "credentials":  "REDACTED_CREDENTIALS"
+                  },
+                  {
+                      "parameters":  {
+                                         "jsCode":  "\nconst input = $(\u0027Input\u0027).first().json;\nconst TRACKING_DAYS = 30;\nconst targetDate = String(input.target_date || \u0027\u0027).slice(0, 10);\n\nconst discovered = $(\u0027Collect Discovered\u0027).all()\n  .map(i =\u003e i.json)\n  .filter(p =\u003e p \u0026\u0026 p.platform_post_id);\n\nconst masterRows = $(\u0027Read Post_Master\u0027).all()\n  .map(i =\u003e i.json)\n  .filter(r =\u003e r \u0026\u0026 r.Post_ID);\n\nconst existing = {};\nfor (let i = 0; i \u003c masterRows.length; i++) {\n  existing[masterRows[i].Post_ID] = masterRows[i];\n}\n\nfunction makePostId(accId, platform, ppid) {\n  return String(accId) + \u0027::\u0027 + String(platform) + \u0027::\u0027 + String(ppid);\n}\nfunction dateOnly(v) {\n  if (!v) return null;\n  const s = String(v).slice(0, 10);\n  return /^\\d{4}-\\d{2}-\\d{2}$/.test(s) ? s : null;\n}\nfunction addDays(dateStr, days) {\n  const d = new Date(dateStr + \u0027T00:00:00Z\u0027);\n  d.setUTCDate(d.getUTCDate() + days);\n  return d.toISOString().slice(0, 10);\n}\n\nconst out = {};\n\n// 1) Discovered posts -\u003e insert or update identity + refresh Last_Seen.\nfor (let i = 0; i \u003c discovered.length; i++) {\n  const p = discovered[i];\n  const postId = makePostId(input.account_id, p.platform, p.platform_post_id);\n  const ex = existing[postId];\n  const pubDate = dateOnly(p.published_at) || (ex ? dateOnly(ex.Published_At) : null) || targetDate;\n  const trackingUntil = addDays(pubDate, TRACKING_DAYS);\n  const active = targetDate \u003c= trackingUntil;\n  out[postId] = {\n    Post_ID: postId,\n    Account_ID: input.account_id || \u0027\u0027,\n    Brand_ID: input.brand_id || \u0027\u0027,\n    Brand_Name: input.brand_name || \u0027\u0027,\n    Platform: p.platform || \u0027\u0027,\n    Platform_Post_ID: p.platform_post_id || \u0027\u0027,\n    Post_URL: p.post_url || (ex ? ex.Post_URL : \u0027\u0027) || \u0027\u0027,\n    Published_At: p.published_at || (ex ? ex.Published_At : \u0027\u0027) || \u0027\u0027,\n    Content_Type: p.content_type || (ex ? ex.Content_Type : \u0027\u0027) || \u0027\u0027,\n    Caption: p.caption || (ex ? ex.Caption : \u0027\u0027) || \u0027\u0027,\n    First_Seen: (ex \u0026\u0026 ex.First_Seen) ? ex.First_Seen : targetDate,\n    Last_Seen: targetDate,\n    Active_Tracking: active ? \u0027TRUE\u0027 : \u0027FALSE\u0027,\n    Tracking_Until: trackingUntil,\n    Notes: (ex \u0026\u0026 ex.Notes) ? ex.Notes : \u0027\u0027,\n    __should_collect: active,\n  };\n}\n\n// 2) Existing tracked posts for this account not rediscovered this run -\u003e keep window fresh.\nfor (let i = 0; i \u003c masterRows.length; i++) {\n  const r = masterRows[i];\n  if (String(r.Account_ID) !== String(input.account_id)) continue;\n  if (out[r.Post_ID]) continue;\n  const pubDate = dateOnly(r.Published_At) || dateOnly(r.First_Seen) || targetDate;\n  const trackingUntil = dateOnly(r.Tracking_Until) || addDays(pubDate, TRACKING_DAYS);\n  const active = targetDate \u003c= trackingUntil;\n  out[r.Post_ID] = {\n    Post_ID: r.Post_ID,\n    Account_ID: r.Account_ID || \u0027\u0027,\n    Brand_ID: r.Brand_ID || \u0027\u0027,\n    Brand_Name: r.Brand_Name || \u0027\u0027,\n    Platform: r.Platform || \u0027\u0027,\n    Platform_Post_ID: r.Platform_Post_ID || \u0027\u0027,\n    Post_URL: r.Post_URL || \u0027\u0027,\n    Published_At: r.Published_At || \u0027\u0027,\n    Content_Type: r.Content_Type || \u0027\u0027,\n    Caption: r.Caption || \u0027\u0027,\n    First_Seen: r.First_Seen || targetDate,\n    Last_Seen: r.Last_Seen || \u0027\u0027,\n    Active_Tracking: active ? \u0027TRUE\u0027 : \u0027FALSE\u0027,\n    Tracking_Until: trackingUntil,\n    Notes: r.Notes || \u0027\u0027,\n    __should_collect: active,\n  };\n}\n\nconst keys = Object.keys(out);\nif (!keys.length) return [];\nreturn keys.map(k =\u003e ({ json: out[k] }));\n"
+                                     },
+                      "id":  "b07ec42b-c+00 0000 0000a949-6ba60d54ee84",
+                      "name":  "Compute Tracking",
+                      "type":  "n8n-nodes-base.code",
+                      "typeVersion":  2,
+                      "position":  [
+                                       1568,
+                                       272
+                                   ],
+                      "executeOnce":  true
+                  },
+                  {
+                      "parameters":  {
+                                         "operation":  "appendOrUpdate",
+                                         "documentId":  "REDACTED_DOCUMENTID",
+                                         "sheetName":  {
+                                                           "__rl":  true,
+                                                           "mode":  "name",
+                                                           "value":  "Post_Master"
+                                                       },
+                                         "columns":  {
+                                                         "mappingMode":  "autoMapInputData",
+                                                         "matchingColumns":  [
+                                                                                 "Post_ID"
+                                                                             ],
+                                                         "value":  {
+
+                                                                   },
+                                                         "schema":  [
+                                                                        {
+                                                                            "id":  "Post_ID",
+                                                                            "displayName":  "Post_ID",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true
+                                                                        },
+                                                                        {
+                                                                            "id":  "Account_ID",
+                                                                            "displayName":  "Account_ID",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Brand_ID",
+                                                                            "displayName":  "Brand_ID",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Brand_Name",
+                                                                            "displayName":  "Brand_Name",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Platform",
+                                                                            "displayName":  "Platform",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Platform_Post_ID",
+                                                                            "displayName":  "Platform_Post_ID",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Post_URL",
+                                                                            "displayName":  "Post_URL",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Published_At",
+                                                                            "displayName":  "Published_At",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Content_Type",
+                                                                            "displayName":  "Content_Type",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Caption",
+                                                                            "displayName":  "Caption",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "First_Seen",
+                                                                            "displayName":  "First_Seen",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Last_Seen",
+                                                                            "displayName":  "Last_Seen",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Active_Tracking",
+                                                                            "displayName":  "Active_Tracking",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Tracking_Until",
+                                                                            "displayName":  "Tracking_Until",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Notes",
+                                                                            "displayName":  "Notes",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        }
+                                                                    ]
+                                                     },
+                                         "options":  {
+                                                         "handlingExtraData":  "ignoreIt"
+                                                     }
+                                     },
+                      "id":  "a53b8536-c645-41d0-a327-b971b9bc324d",
+                      "name":  "Upsert Post_Master",
+                      "type":  "n8n-nodes-base.googleSheets",
+                      "typeVersion":  4.7,
+                      "position":  [
+                                       1792,
+                                       272
+                                   ],
+                      "credentials":  "REDACTED_CREDENTIALS"
+                  },
+                  {
+                      "parameters":  {
+                                         "jsCode":  "\nconst input = $(\u0027Input\u0027).first().json;\nconst rows = $(\u0027Compute Tracking\u0027).all().map(i =\u003e i.json);\nconst out = [];\nfor (let i = 0; i \u003c rows.length; i++) {\n  const r = rows[i];\n  if (!r || !r.__should_collect) continue;\n  out.push({ json: {\n    run_id: input.run_id || null,\n    target_date: input.target_date || null,\n    account_id: r.Account_ID || null,\n    brand_id: r.Brand_ID || null,\n    brand_name: r.Brand_Name || null,\n    platform: r.Platform || null,\n    account_type: input.account_type || null,\n    platform_account_id: input.platform_account_id || null,\n    post_id: r.Post_ID || null,\n    platform_post_id: r.Platform_Post_ID || null,\n    post_url: r.Post_URL || null,\n    published_at: r.Published_At || null,\n    content_type: r.Content_Type || null,\n    caption: r.Caption || null,\n  }});\n}\nreturn out;\n"
+                                     },
+                      "id":  "c0f3483b-98f7-4ed4-8bdc-4c9a9fc09cde",
+                      "name":  "Return Tracked Posts",
+                      "type":  "n8n-nodes-base.code",
+                      "typeVersion":  2,
+                      "position":  [
+                                       2016,
+                                       272
+                                   ],
+                      "executeOnce":  true,
+                      "alwaysOutputData":  true
+                  }
+              ],
+    "connections":  {
+                        "Input":  {
+                                      "main":  [
+                                                   [
+                                                       {
+                                                           "node":  "Has Account ID?",
+                                                           "type":  "main",
+                                                           "index":  0
+                                                       }
+                                                   ]
+                                               ]
+                                  },
+                        "Has Account ID?":  {
+                                                "main":  [
+                                                             [
+                                                                 {
+                                                                     "node":  "Route by Platform",
+                                                                     "type":  "main",
+                                                                     "index":  0
+                                                                 }
+                                                             ],
+                                                             [
+                                                                 {
+                                                                     "node":  "Missing Account ID",
+                                                                     "type":  "main",
+                                                                     "index":  0
+                                                                 }
+                                                             ]
+                                                         ]
+                                            },
+                        "Route by Platform":  {
+                                                  "main":  [
+                                                               [
+                                                                   {
+                                                                       "node":  "IG Media",
+                                                                       "type":  "main",
+                                                                       "index":  0
+                                                                   }
+                                                               ],
+                                                               [
+                                                                   {
+                                                                       "node":  "FB Posts",
+                                                                       "type":  "main",
+                                                                       "index":  0
+                                                                   }
+                                                               ],
+                                                               [
+                                                                   {
+                                                                       "node":  "YT Recent Videos",
+                                                                       "type":  "main",
+                                                                       "index":  0
+                                                                   }
+                                                               ],
+                                                               [
+                                                                   {
+                                                                       "node":  "LI Org Posts",
+                                                                       "type":  "main",
+                                                                       "index":  0
+                                                                   }
+                                                               ],
+                                                               [
+                                                                   {
+                                                                       "node":  "Unsupported Platform",
+                                                                       "type":  "main",
+                                                                       "index":  0
+                                                                   }
+                                                               ]
+                                                           ]
+                                              },
+                        "IG Media":  {
+                                         "main":  [
+                                                      [
+                                                          {
+                                                              "node":  "Normalize IG",
+                                                              "type":  "main",
+                                                              "index":  0
+                                                          }
+                                                      ]
+                                                  ]
+                                     },
+                        "Normalize IG":  {
+                                             "main":  [
+                                                          [
+                                                              {
+                                                                  "node":  "Collect Discovered",
+                                                                  "type":  "main",
+                                                                  "index":  0
+                                                              }
+                                                          ]
+                                                      ]
+                                         },
+                        "Collect Discovered":  {
+                                                   "main":  [
+                                                                [
+                                                                    {
+                                                                        "node":  "Read Post_Master",
+                                                                        "type":  "main",
+                                                                        "index":  0
+                                                                    }
+                                                                ]
+                                                            ]
+                                               },
+                        "FB Posts":  {
+                                         "main":  [
+                                                      [
+                                                          {
+                                                              "node":  "Normalize FB",
+                                                              "type":  "main",
+                                                              "index":  0
+                                                          }
+                                                      ]
+                                                  ]
+                                     },
+                        "Normalize FB":  {
+                                             "main":  [
+                                                          [
+                                                              {
+                                                                  "node":  "Collect Discovered",
+                                                                  "type":  "main",
+                                                                  "index":  0
+                                                              }
+                                                          ]
+                                                      ]
+                                         },
+                        "YT Recent Videos":  {
+                                                 "main":  [
+                                                              [
+                                                                  {
+                                                                      "node":  "Normalize YT",
+                                                                      "type":  "main",
+                                                                      "index":  0
+                                                                  }
+                                                              ]
+                                                          ]
+                                             },
+                        "Normalize YT":  {
+                                             "main":  [
+                                                          [
+                                                              {
+                                                                  "node":  "Collect Discovered",
+                                                                  "type":  "main",
+                                                                  "index":  0
+                                                              }
+                                                          ]
+                                                      ]
+                                         },
+                        "LI Org Posts":  {
+                                             "main":  [
+                                                          [
+                                                              {
+                                                                  "node":  "Normalize LI",
+                                                                  "type":  "main",
+                                                                  "index":  0
+                                                              }
+                                                          ]
+                                                      ]
+                                         },
+                        "Normalize LI":  {
+                                             "main":  [
+                                                          [
+                                                              {
+                                                                  "node":  "Collect Discovered",
+                                                                  "type":  "main",
+                                                                  "index":  0
+                                                              }
+                                                          ]
+                                                      ]
+                                         },
+                        "Unsupported Platform":  {
+                                                     "main":  [
+                                                                  [
+                                                                      {
+                                                                          "node":  "Collect Discovered",
+                                                                          "type":  "main",
+                                                                          "index":  0
+                                                                      }
+                                                                  ]
+                                                              ]
+                                                 },
+                        "Read Post_Master":  {
+                                                 "main":  [
+                                                              [
+                                                                  {
+                                                                      "node":  "Compute Tracking",
+                                                                      "type":  "main",
+                                                                      "index":  0
+                                                                  }
+                                                              ]
+                                                          ]
+                                             },
+                        "Compute Tracking":  {
+                                                 "main":  [
+                                                              [
+                                                                  {
+                                                                      "node":  "Upsert Post_Master",
+                                                                      "type":  "main",
+                                                                      "index":  0
+                                                                  }
+                                                              ]
+                                                          ]
+                                             },
+                        "Upsert Post_Master":  {
+                                                   "main":  [
+                                                                [
+                                                                    {
+                                                                        "node":  "Return Tracked Posts",
+                                                                        "type":  "main",
+                                                                        "index":  0
+                                                                    }
+                                                                ]
+                                                            ]
+                                               }
+                    },
+    "pinData":  {
+
+                },
+    "meta":  {
+                 "instanceId":  "dcb7007d2a9977412bea33d09d5fbf2eca63d0e7f2ce59c7e8d5d882e83728e4"
+             },
+    "active":  false
+}

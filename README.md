@@ -18,6 +18,7 @@ The projects are portfolio workflow exports and architecture examples. Their doc
 | **MedFlow — Healthcare Practice Operations Automation** | Administrative workflows for medical practices | Patient intake, scheduling, communication, revenue-cycle patterns, reputation, inventory, practice intelligence | Architecture prototype; regulated deployment not evidenced | [View case study](healthcare-practice-operations-automation/README.md) |
 | **RestoFlow — Restaurant Revenue & Guest Experience Automation** | Hospitality operations and guest engagement | Voice intake, reservations, no-show prevention, messaging, CRM, loyalty, reviews, promotions, reporting | Workflow prototype; deployment and outcomes unverified | [View case study](restaurant-revenue-guest-experience-automation/README.md) |
 | **ZedProp — Property Management & Tenant Service Automation** | Tenant self-service and property operations | Tenant lookup, lease and payment requests, invoice retrieval, maintenance requests, document delivery, interaction logging | Demo implementation; validation required | [View case study](property-management-tenant-service-automation/README.md) |
+| **Wellness Vibe — Learner, Messaging & Social Operations Automation** | Education and learner operations | Graphy learner sync, payment reminders, campaign delivery, voice-scan alerts, social analytics, Google Sheets operations | Sanitized implementation source; validation required | [View case study](wellness-vibe-automation/README.md) |
 
 ## How AKcelerateHQ Works
 

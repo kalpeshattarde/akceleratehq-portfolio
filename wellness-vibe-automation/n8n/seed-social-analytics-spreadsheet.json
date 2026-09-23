@@ -1,0 +1,1211 @@
+﻿{
+    "nodes":  [
+                  {
+                      "parameters":  {
+
+                                     },
+                      "id":  "908f8745-bba4-454f-a697-4fd7f8f5ced2",
+                      "name":  "Run Once",
+                      "type":  "n8n-nodes-base.manualTrigger",
+                      "typeVersion":  1,
+                      "position":  [
+                                       -496,
+                                       112
+                                   ]
+                  },
+                  {
+                      "parameters":  {
+                                         "resource":  "spreadsheet",
+                                         "title":  "Social Media Analytics Dashboard",
+                                         "sheetsUi":  {
+                                                          "sheetValues":  [
+                                                                              {
+                                                                                  "title":  "Account_Master"
+                                                                              },
+                                                                              {
+                                                                                  "title":  "Daily_Metrics"
+                                                                              },
+                                                                              {
+                                                                                  "title":  "Post_Master"
+                                                                              },
+                                                                              {
+                                                                                  "title":  "Post_Metrics"
+                                                                              },
+                                                                              {
+                                                                                  "title":  "API_Log"
+                                                                              }
+                                                                          ]
+                                                      },
+                                         "options":  {
+                                                         "locale":  "en_US"
+                                                     }
+                                     },
+                      "id":  "d5f9d1e9-f603-4b0b-888f-b39ce04a9ad4",
+                      "name":  "Create Spreadsheet",
+                      "type":  "n8n-nodes-base.googleSheets",
+                      "typeVersion":  4.7,
+                      "position":  [
+                                       -272,
+                                       112
+                                   ]
+                  },
+                  {
+                      "parameters":  {
+                                         "jsCode":  "const brands = [\n  { bid: \u0027WV\u0027, bname: \u0027Wellness Vibe\u0027 },\n  { bid: \u0027RV\u0027, bname: \u0027Rivesh Vade\u0027 },\n  { bid: \u0027BF\u0027, bname: \u0027Bodhmarga Foundation\u0027 },\n];\nconst platforms = [\u0027Instagram\u0027, \u0027Facebook\u0027, \u0027YouTube\u0027, \u0027LinkedIn\u0027];\nconst suffix = { Instagram: \u0027IG\u0027, Facebook: \u0027FB\u0027, YouTube: \u0027YT\u0027, LinkedIn: \u0027LI\u0027 };\n\nfunction accountType(bid, platform) {\n  if (platform === \u0027Instagram\u0027) return \u0027Business/Creator\u0027;\n  if (platform === \u0027Facebook\u0027) return \u0027Page\u0027;\n  if (platform === \u0027YouTube\u0027) return \u0027Channel\u0027;\n  if (platform === \u0027LinkedIn\u0027) return (bid === \u0027RV\u0027) ? \u0027Personal\u0027 : \u0027Page\u0027;\n  return \u0027\u0027;\n}\nfunction credName(bid, platform) {\n  if (platform === \u0027Instagram\u0027 || platform === \u0027Facebook\u0027) return \u0027META_\u0027 + bid;\n  if (platform === \u0027YouTube\u0027) return \u0027GOOGLE_\u0027 + bid;\n  if (platform === \u0027LinkedIn\u0027) return \u0027LINKEDIN_\u0027 + bid;\n  return \u0027\u0027;\n}\nfunction idHint(platform, atype) {\n  if (platform === \u0027Instagram\u0027) return \u0027FILL_IG_BUSINESS_ID\u0027;\n  if (platform === \u0027Facebook\u0027) return \u0027FILL_FB_PAGE_ID\u0027;\n  if (platform === \u0027YouTube\u0027) return \u0027FILL_YT_CHANNEL_ID\u0027;\n  if (platform === \u0027LinkedIn\u0027) return (atype === \u0027Personal\u0027) ? \u0027FILL_LI_MEMBER_ID\u0027 : \u0027FILL_LI_ORG_URN_ID\u0027;\n  return \u0027\u0027;\n}\nfunction notes(platform, atype) {\n  if (platform === \u0027LinkedIn\u0027 \u0026\u0026 atype === \u0027Personal\u0027) {\n    return \u0027LinkedIn Personal/Creator: no supported public API for profile analytics; collector returns PARTIAL with NULL metrics by design.\u0027;\n  }\n  return \u0027\u0027;\n}\n\nconst rows = [];\nfor (let b = 0; b \u003c brands.length; b++) {\n  const br = brands[b];\n  for (let p = 0; p \u003c platforms.length; p++) {\n    const platform = platforms[p];\n    const atype = accountType(br.bid, platform);\n    rows.push({\n      Account_ID: br.bid + \u0027_\u0027 + suffix[platform],\n      Brand_ID: br.bid,\n      Brand_Name: br.bname,\n      Platform: platform,\n      Account_Type: atype,\n      Platform_Account_ID: idHint(platform, atype),\n      Account_Name: br.bname + \u0027 \u0027 + platform,\n      Active: \u0027TRUE\u0027,\n      Timezone: \u0027Asia/Kolkata\u0027,\n      Credential_Name: credName(br.bid, platform),\n      Last_Sync: \u0027\u0027,\n      Notes: notes(platform, atype),\n    });\n  }\n}\nreturn rows.map(function (r) { return { json: r }; });"
+                                     },
+                      "id":  "913fe+00 0000 0000cea-9156-6c4fabbc79e4",
+                      "name":  "Build Account Rows",
+                      "type":  "n8n-nodes-base.code",
+                      "typeVersion":  2,
+                      "position":  [
+                                       -48,
+                                       -176
+                                   ]
+                  },
+                  {
+                      "parameters":  {
+                                         "operation":  "append",
+                                         "documentId":  "REDACTED_DOCUMENTID",
+                                         "sheetName":  {
+                                                           "__rl":  true,
+                                                           "mode":  "name",
+                                                           "value":  "Account_Master"
+                                                       },
+                                         "columns":  {
+                                                         "mappingMode":  "autoMapInputData",
+                                                         "value":  {
+
+                                                                   },
+                                                         "schema":  [
+                                                                        {
+                                                                            "id":  "Account_ID",
+                                                                            "displayName":  "Account_ID",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Brand_ID",
+                                                                            "displayName":  "Brand_ID",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Brand_Name",
+                                                                            "displayName":  "Brand_Name",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Platform",
+                                                                            "displayName":  "Platform",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Account_Type",
+                                                                            "displayName":  "Account_Type",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Platform_Account_ID",
+                                                                            "displayName":  "Platform_Account_ID",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Account_Name",
+                                                                            "displayName":  "Account_Name",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Active",
+                                                                            "displayName":  "Active",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Timezone",
+                                                                            "displayName":  "Timezone",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Credential_Name",
+                                                                            "displayName":  "Credential_Name",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Last_Sync",
+                                                                            "displayName":  "Last_Sync",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Notes",
+                                                                            "displayName":  "Notes",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        }
+                                                                    ]
+                                                     },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "id":  "3c7dd4c8-20e9-4e00-ac30-f5b69b879043",
+                      "name":  "Seed Account_Master",
+                      "type":  "n8n-nodes-base.googleSheets",
+                      "typeVersion":  4.7,
+                      "position":  [
+                                       176,
+                                       -176
+                                   ]
+                  },
+                  {
+                      "parameters":  {
+                                         "jsCode":  "return [{ json: {\n  \"Run_ID\": \u0027\u0027,\n  \"Date\": \u0027\u0027,\n  \"Account_ID\": \u0027\u0027,\n  \"Brand_ID\": \u0027\u0027,\n  \"Brand_Name\": \u0027\u0027,\n  \"Platform\": \u0027\u0027,\n  \"Account_Type\": \u0027\u0027,\n  \"Platform_Account_ID\": \u0027\u0027,\n  \"Followers\": \u0027\u0027,\n  \"Followers_Gained\": \u0027\u0027,\n  \"Followers_Lost\": \u0027\u0027,\n  \"Impressions\": \u0027\u0027,\n  \"Reach\": \u0027\u0027,\n  \"Views\": \u0027\u0027,\n  \"Likes\": \u0027\u0027,\n  \"Comments\": \u0027\u0027,\n  \"Shares\": \u0027\u0027,\n  \"Saves\": \u0027\u0027,\n  \"Engagements\": \u0027\u0027,\n  \"Engagement_Rate\": \u0027\u0027,\n  \"Posts_Published\": \u0027\u0027,\n  \"Video_Views\": \u0027\u0027,\n  \"Watch_Time\": \u0027\u0027,\n  \"Profile_Views\": \u0027\u0027,\n  \"Link_Clicks\": \u0027\u0027,\n  \"Data_Status\": \u0027\u0027,\n  \"Collected_At\": \u0027\u0027,\n  \"Error_Message\": \u0027\u0027\n} }];"
+                                     },
+                      "id":  "12c45a3c-2d63-41c1-96cb-9e565a52211b",
+                      "name":  "Build Daily Header",
+                      "type":  "n8n-nodes-base.code",
+                      "typeVersion":  2,
+                      "position":  [
+                                       -48,
+                                       16
+                                   ]
+                  },
+                  {
+                      "parameters":  {
+                                         "operation":  "append",
+                                         "documentId":  "REDACTED_DOCUMENTID",
+                                         "sheetName":  {
+                                                           "__rl":  true,
+                                                           "mode":  "name",
+                                                           "value":  "Daily_Metrics"
+                                                       },
+                                         "columns":  {
+                                                         "mappingMode":  "autoMapInputData",
+                                                         "value":  {
+
+                                                                   },
+                                                         "schema":  [
+                                                                        {
+                                                                            "id":  "Run_ID",
+                                                                            "displayName":  "Run_ID",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Date",
+                                                                            "displayName":  "Date",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Account_ID",
+                                                                            "displayName":  "Account_ID",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Brand_ID",
+                                                                            "displayName":  "Brand_ID",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Brand_Name",
+                                                                            "displayName":  "Brand_Name",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Platform",
+                                                                            "displayName":  "Platform",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Account_Type",
+                                                                            "displayName":  "Account_Type",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Platform_Account_ID",
+                                                                            "displayName":  "Platform_Account_ID",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Followers",
+                                                                            "displayName":  "Followers",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Followers_Gained",
+                                                                            "displayName":  "Followers_Gained",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Followers_Lost",
+                                                                            "displayName":  "Followers_Lost",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Impressions",
+                                                                            "displayName":  "Impressions",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Reach",
+                                                                            "displayName":  "Reach",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Views",
+                                                                            "displayName":  "Views",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Likes",
+                                                                            "displayName":  "Likes",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Comments",
+                                                                            "displayName":  "Comments",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Shares",
+                                                                            "displayName":  "Shares",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Saves",
+                                                                            "displayName":  "Saves",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Engagements",
+                                                                            "displayName":  "Engagements",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Engagement_Rate",
+                                                                            "displayName":  "Engagement_Rate",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Posts_Published",
+                                                                            "displayName":  "Posts_Published",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Video_Views",
+                                                                            "displayName":  "Video_Views",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Watch_Time",
+                                                                            "displayName":  "Watch_Time",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Profile_Views",
+                                                                            "displayName":  "Profile_Views",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Link_Clicks",
+                                                                            "displayName":  "Link_Clicks",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Data_Status",
+                                                                            "displayName":  "Data_Status",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Collected_At",
+                                                                            "displayName":  "Collected_At",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Error_Message",
+                                                                            "displayName":  "Error_Message",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        }
+                                                                    ]
+                                                     },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "id":  "d8a+00 0000 0000f-4e8b-89bc-0d6b4c47259e",
+                      "name":  "Seed Daily_Metrics",
+                      "type":  "n8n-nodes-base.googleSheets",
+                      "typeVersion":  4.7,
+                      "position":  [
+                                       176,
+                                       16
+                                   ]
+                  },
+                  {
+                      "parameters":  {
+                                         "jsCode":  "return [{ json: {\n  \"Post_ID\": \u0027\u0027,\n  \"Account_ID\": \u0027\u0027,\n  \"Brand_ID\": \u0027\u0027,\n  \"Brand_Name\": \u0027\u0027,\n  \"Platform\": \u0027\u0027,\n  \"Platform_Post_ID\": \u0027\u0027,\n  \"Post_URL\": \u0027\u0027,\n  \"Published_At\": \u0027\u0027,\n  \"Content_Type\": \u0027\u0027,\n  \"Caption\": \u0027\u0027,\n  \"First_Seen\": \u0027\u0027,\n  \"Last_Seen\": \u0027\u0027,\n  \"Active_Tracking\": \u0027\u0027,\n  \"Tracking_Until\": \u0027\u0027,\n  \"Notes\": \u0027\u0027\n} }];"
+                                     },
+                      "id":  "1b27cd18-e6d4-4a0e-a042-25bbf5f3da4d",
+                      "name":  "Build Post_Master Header",
+                      "type":  "n8n-nodes-base.code",
+                      "typeVersion":  2,
+                      "position":  [
+                                       -48,
+                                       208
+                                   ]
+                  },
+                  {
+                      "parameters":  {
+                                         "operation":  "append",
+                                         "documentId":  "REDACTED_DOCUMENTID",
+                                         "sheetName":  {
+                                                           "__rl":  true,
+                                                           "mode":  "name",
+                                                           "value":  "Post_Master"
+                                                       },
+                                         "columns":  {
+                                                         "mappingMode":  "autoMapInputData",
+                                                         "value":  {
+
+                                                                   },
+                                                         "schema":  [
+                                                                        {
+                                                                            "id":  "Post_ID",
+                                                                            "displayName":  "Post_ID",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Account_ID",
+                                                                            "displayName":  "Account_ID",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Brand_ID",
+                                                                            "displayName":  "Brand_ID",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Brand_Name",
+                                                                            "displayName":  "Brand_Name",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Platform",
+                                                                            "displayName":  "Platform",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Platform_Post_ID",
+                                                                            "displayName":  "Platform_Post_ID",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Post_URL",
+                                                                            "displayName":  "Post_URL",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Published_At",
+                                                                            "displayName":  "Published_At",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Content_Type",
+                                                                            "displayName":  "Content_Type",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Caption",
+                                                                            "displayName":  "Caption",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "First_Seen",
+                                                                            "displayName":  "First_Seen",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Last_Seen",
+                                                                            "displayName":  "Last_Seen",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Active_Tracking",
+                                                                            "displayName":  "Active_Tracking",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Tracking_Until",
+                                                                            "displayName":  "Tracking_Until",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Notes",
+                                                                            "displayName":  "Notes",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        }
+                                                                    ]
+                                                     },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "id":  "df7f8b5c-2706-4c08-b34b-79dd62d360d7",
+                      "name":  "Seed Post_Master",
+                      "type":  "n8n-nodes-base.googleSheets",
+                      "typeVersion":  4.7,
+                      "position":  [
+                                       176,
+                                       592
+                                   ]
+                  },
+                  {
+                      "parameters":  {
+                                         "jsCode":  "return [{ json: {\n  \"Run_ID\": \u0027\u0027,\n  \"Date\": \u0027\u0027,\n  \"Account_ID\": \u0027\u0027,\n  \"Brand_ID\": \u0027\u0027,\n  \"Brand_Name\": \u0027\u0027,\n  \"Platform\": \u0027\u0027,\n  \"Post_ID\": \u0027\u0027,\n  \"Platform_Post_ID\": \u0027\u0027,\n  \"Post_URL\": \u0027\u0027,\n  \"Published_At\": \u0027\u0027,\n  \"Content_Type\": \u0027\u0027,\n  \"Caption\": \u0027\u0027,\n  \"Impressions\": \u0027\u0027,\n  \"Reach\": \u0027\u0027,\n  \"Views\": \u0027\u0027,\n  \"Likes\": \u0027\u0027,\n  \"Comments\": \u0027\u0027,\n  \"Shares\": \u0027\u0027,\n  \"Saves\": \u0027\u0027,\n  \"Engagements\": \u0027\u0027,\n  \"Engagement_Rate\": \u0027\u0027,\n  \"Video_Views\": \u0027\u0027,\n  \"Watch_Time\": \u0027\u0027,\n  \"Collected_At\": \u0027\u0027,\n  \"Data_Status\": \u0027\u0027,\n  \"Error_Message\": \u0027\u0027\n} }];"
+                                     },
+                      "id":  "1d5a4c83-7b+00 0000 0000dc-152435a96481",
+                      "name":  "Build Post_Metrics Header",
+                      "type":  "n8n-nodes-base.code",
+                      "typeVersion":  2,
+                      "position":  [
+                                       -48,
+                                       592
+                                   ]
+                  },
+                  {
+                      "parameters":  {
+                                         "operation":  "append",
+                                         "documentId":  "REDACTED_DOCUMENTID",
+                                         "sheetName":  {
+                                                           "__rl":  true,
+                                                           "mode":  "name",
+                                                           "value":  "Post_Metrics"
+                                                       },
+                                         "columns":  {
+                                                         "mappingMode":  "autoMapInputData",
+                                                         "value":  {
+
+                                                                   },
+                                                         "schema":  [
+                                                                        {
+                                                                            "id":  "Run_ID",
+                                                                            "displayName":  "Run_ID",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Date",
+                                                                            "displayName":  "Date",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Account_ID",
+                                                                            "displayName":  "Account_ID",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Brand_ID",
+                                                                            "displayName":  "Brand_ID",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Brand_Name",
+                                                                            "displayName":  "Brand_Name",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Platform",
+                                                                            "displayName":  "Platform",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Post_ID",
+                                                                            "displayName":  "Post_ID",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Platform_Post_ID",
+                                                                            "displayName":  "Platform_Post_ID",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Post_URL",
+                                                                            "displayName":  "Post_URL",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Published_At",
+                                                                            "displayName":  "Published_At",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Content_Type",
+                                                                            "displayName":  "Content_Type",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Caption",
+                                                                            "displayName":  "Caption",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Impressions",
+                                                                            "displayName":  "Impressions",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Reach",
+                                                                            "displayName":  "Reach",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Views",
+                                                                            "displayName":  "Views",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Likes",
+                                                                            "displayName":  "Likes",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Comments",
+                                                                            "displayName":  "Comments",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Shares",
+                                                                            "displayName":  "Shares",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Saves",
+                                                                            "displayName":  "Saves",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Engagements",
+                                                                            "displayName":  "Engagements",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Engagement_Rate",
+                                                                            "displayName":  "Engagement_Rate",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Video_Views",
+                                                                            "displayName":  "Video_Views",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Watch_Time",
+                                                                            "displayName":  "Watch_Time",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Collected_At",
+                                                                            "displayName":  "Collected_At",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Data_Status",
+                                                                            "displayName":  "Data_Status",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Error_Message",
+                                                                            "displayName":  "Error_Message",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        }
+                                                                    ]
+                                                     },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "id":  "29f23395-a0d1-41ab-bee9-ae4f72db61ba",
+                      "name":  "Seed Post_Metrics",
+                      "type":  "n8n-nodes-base.googleSheets",
+                      "typeVersion":  4.7,
+                      "position":  [
+                                       176,
+                                       208
+                                   ]
+                  },
+                  {
+                      "parameters":  {
+                                         "jsCode":  "return [{ json: {\n  \"Run_ID\": \u0027\u0027,\n  \"Timestamp\": \u0027\u0027,\n  \"Workflow\": \u0027\u0027,\n  \"Account_ID\": \u0027\u0027,\n  \"Platform\": \u0027\u0027,\n  \"Operation\": \u0027\u0027,\n  \"Status\": \u0027\u0027,\n  \"HTTP_Status\": \u0027\u0027,\n  \"Execution_ID\": \u0027\u0027,\n  \"Retry_Count\": \u0027\u0027,\n  \"Error_Message\": \u0027\u0027,\n  \"Duration_ms\": \u0027\u0027\n} }];"
+                                     },
+                      "id":  "88b8484d-9f3d-4133-a7dc-06233706eb7c",
+                      "name":  "Build Log Header",
+                      "type":  "n8n-nodes-base.code",
+                      "typeVersion":  2,
+                      "position":  [
+                                       -48,
+                                       400
+                                   ]
+                  },
+                  {
+                      "parameters":  {
+                                         "operation":  "append",
+                                         "documentId":  "REDACTED_DOCUMENTID",
+                                         "sheetName":  {
+                                                           "__rl":  true,
+                                                           "mode":  "name",
+                                                           "value":  "API_Log"
+                                                       },
+                                         "columns":  {
+                                                         "mappingMode":  "autoMapInputData",
+                                                         "value":  {
+
+                                                                   },
+                                                         "schema":  [
+                                                                        {
+                                                                            "id":  "Run_ID",
+                                                                            "displayName":  "Run_ID",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Timestamp",
+                                                                            "displayName":  "Timestamp",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Workflow",
+                                                                            "displayName":  "Workflow",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Account_ID",
+                                                                            "displayName":  "Account_ID",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Platform",
+                                                                            "displayName":  "Platform",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Operation",
+                                                                            "displayName":  "Operation",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Status",
+                                                                            "displayName":  "Status",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "HTTP_Status",
+                                                                            "displayName":  "HTTP_Status",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Execution_ID",
+                                                                            "displayName":  "Execution_ID",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Retry_Count",
+                                                                            "displayName":  "Retry_Count",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Error_Message",
+                                                                            "displayName":  "Error_Message",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Duration_ms",
+                                                                            "displayName":  "Duration_ms",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  false
+                                                                        }
+                                                                    ]
+                                                     },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "id":  "6cc36493-eb6d-4a5c-a0c9-8b5893a70d49",
+                      "name":  "Seed API_Log",
+                      "type":  "n8n-nodes-base.googleSheets",
+                      "typeVersion":  4.7,
+                      "position":  [
+                                       176,
+                                       400
+                                   ]
+                  }
+              ],
+    "connections":  {
+                        "Run Once":  {
+                                         "main":  [
+                                                      [
+                                                          {
+                                                              "node":  "Create Spreadsheet",
+                                                              "type":  "main",
+                                                              "index":  0
+                                                          }
+                                                      ]
+                                                  ]
+                                     },
+                        "Create Spreadsheet":  {
+                                                   "main":  [
+                                                                [
+                                                                    {
+                                                                        "node":  "Build Account Rows",
+                                                                        "type":  "main",
+                                                                        "index":  0
+                                                                    },
+                                                                    {
+                                                                        "node":  "Build Daily Header",
+                                                                        "type":  "main",
+                                                                        "index":  0
+                                                                    },
+                                                                    {
+                                                                        "node":  "Build Post_Master Header",
+                                                                        "type":  "main",
+                                                                        "index":  0
+                                                                    },
+                                                                    {
+                                                                        "node":  "Build Post_Metrics Header",
+                                                                        "type":  "main",
+                                                                        "index":  0
+                                                                    },
+                                                                    {
+                                                                        "node":  "Build Log Header",
+                                                                        "type":  "main",
+                                                                        "index":  0
+                                                                    }
+                                                                ]
+                                                            ]
+                                               },
+                        "Build Account Rows":  {
+                                                   "main":  [
+                                                                [
+                                                                    {
+                                                                        "node":  "Seed Account_Master",
+                                                                        "type":  "main",
+                                                                        "index":  0
+                                                                    }
+                                                                ]
+                                                            ]
+                                               },
+                        "Build Daily Header":  {
+                                                   "main":  [
+                                                                [
+                                                                    {
+                                                                        "node":  "Seed Daily_Metrics",
+                                                                        "type":  "main",
+                                                                        "index":  0
+                                                                    }
+                                                                ]
+                                                            ]
+                                               },
+                        "Build Post_Master Header":  {
+                                                         "main":  [
+                                                                      [
+                                                                          {
+                                                                              "node":  "Seed Post_Master",
+                                                                              "type":  "main",
+                                                                              "index":  0
+                                                                          }
+                                                                      ]
+                                                                  ]
+                                                     },
+                        "Build Post_Metrics Header":  {
+                                                          "main":  [
+                                                                       [
+                                                                           {
+                                                                               "node":  "Seed Post_Metrics",
+                                                                               "type":  "main",
+                                                                               "index":  0
+                                                                           }
+                                                                       ]
+                                                                   ]
+                                                      },
+                        "Build Log Header":  {
+                                                 "main":  [
+                                                              [
+                                                                  {
+                                                                      "node":  "Seed API_Log",
+                                                                      "type":  "main",
+                                                                      "index":  0
+                                                                  }
+                                                              ]
+                                                          ]
+                                             }
+                    },
+    "pinData":  {
+
+                },
+    "meta":  {
+                 "instanceId":  "dcb7007d2a9977412bea33d09d5fbf2eca63d0e7f2ce59c7e8d5d882e83728e4"
+             },
+    "active":  false
+}

@@ -1,0 +1,412 @@
+﻿{
+    "nodes":  [
+                  {
+                      "parameters":  {
+                                         "workflowInputs":  {
+                                                                "values":  [
+                                                                               {
+                                                                                   "name":  "run_id"
+                                                                               },
+                                                                               {
+                                                                                   "name":  "target_date"
+                                                                               },
+                                                                               {
+                                                                                   "name":  "account_id"
+                                                                               },
+                                                                               {
+                                                                                   "name":  "brand_id"
+                                                                               },
+                                                                               {
+                                                                                   "name":  "brand_name"
+                                                                               },
+                                                                               {
+                                                                                   "name":  "platform"
+                                                                               },
+                                                                               {
+                                                                                   "name":  "account_type"
+                                                                               },
+                                                                               {
+                                                                                   "name":  "platform_account_id"
+                                                                               },
+                                                                               {
+                                                                                   "name":  "credential_name"
+                                                                               },
+                                                                               {
+                                                                                   "name":  "timezone"
+                                                                               }
+                                                                           ]
+                                                            }
+                                     },
+                      "id":  "53c2e24f-39e0-403a-a3b4-25d711384fe7",
+                      "name":  "Input",
+                      "type":  "n8n-nodes-base.executeWorkflowTrigger",
+                      "typeVersion":  1.2,
+                      "position":  [
+                                       -688,
+                                       208
+                                   ]
+                  },
+                  {
+                      "parameters":  {
+                                         "conditions":  {
+                                                            "options":  {
+                                                                            "caseSensitive":  true,
+                                                                            "leftValue":  "",
+                                                                            "typeValidation":  "loose",
+                                                                            "version":  2
+                                                                        },
+                                                            "conditions":  [
+                                                                               {
+                                                                                   "id":  "has-id",
+                                                                                   "leftValue":  "={{ $json.platform_account_id }}",
+                                                                                   "rightValue":  "",
+                                                                                   "operator":  {
+                                                                                                    "type":  "string",
+                                                                                                    "operation":  "notEmpty"
+                                                                                                }
+                                                                               }
+                                                                           ],
+                                                            "combinator":  "and"
+                                                        },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "id":  "6d14dc85-5c34-45ac-a099-6ed87ffdeb80",
+                      "name":  "Has Account ID?",
+                      "type":  "n8n-nodes-base.if",
+                      "typeVersion":  2.2,
+                      "position":  [
+                                       -464,
+                                       208
+                                   ]
+                  },
+                  {
+                      "parameters":  {
+                                         "rules":  {
+                                                       "values":  [
+                                                                      {
+                                                                          "conditions":  {
+                                                                                             "options":  {
+                                                                                                             "caseSensitive":  false,
+                                                                                                             "leftValue":  "",
+                                                                                                             "typeValidation":  "loose",
+                                                                                                             "version":  1
+                                                                                                         },
+                                                                                             "conditions":  [
+                                                                                                                {
+                                                                                                                    "leftValue":  "={{ $json.platform }}",
+                                                                                                                    "rightValue":  "Instagram",
+                                                                                                                    "operator":  {
+                                                                                                                                     "type":  "string",
+                                                                                                                                     "operation":  "equals"
+                                                                                                                                 }
+                                                                                                                }
+                                                                                                            ],
+                                                                                             "combinator":  "and"
+                                                                                         },
+                                                                          "renameOutput":  true,
+                                                                          "outputKey":  "instagram"
+                                                                      },
+                                                                      {
+                                                                          "conditions":  {
+                                                                                             "options":  {
+                                                                                                             "caseSensitive":  false,
+                                                                                                             "leftValue":  "",
+                                                                                                             "typeValidation":  "loose",
+                                                                                                             "version":  1
+                                                                                                         },
+                                                                                             "conditions":  [
+                                                                                                                {
+                                                                                                                    "leftValue":  "={{ $json.platform }}",
+                                                                                                                    "rightValue":  "Facebook",
+                                                                                                                    "operator":  {
+                                                                                                                                     "type":  "string",
+                                                                                                                                     "operation":  "equals"
+                                                                                                                                 }
+                                                                                                                }
+                                                                                                            ],
+                                                                                             "combinator":  "and"
+                                                                                         },
+                                                                          "renameOutput":  true,
+                                                                          "outputKey":  "facebook"
+                                                                      }
+                                                                  ]
+                                                   },
+                                         "options":  {
+                                                         "fallbackOutput":  "extra",
+                                                         "renameFallbackOutput":  "unsupported"
+                                                     }
+                                     },
+                      "id":  "91c+00 0000 0000ce-9685-dae79144fe17",
+                      "name":  "Route by Platform",
+                      "type":  "n8n-nodes-base.switch",
+                      "typeVersion":  3.4,
+                      "position":  [
+                                       -240,
+                                       80
+                                   ]
+                  },
+                  {
+                      "parameters":  {
+                                         "url":  "=https://graph.facebook.com/v21.0/{{ $json.platform_account_id }}/insights",
+                                         "authentication":  "predefinedCredentialType",
+                                         "nodeCredentialType":  "REDACTED_NODECREDENTIALTYPE",
+                                         "sendQuery":  true,
+                                         "queryParameters":  {
+                                                                 "parameters":  [
+                                                                                    {
+                                                                                        "name":  "metric",
+                                                                                        "value":  "reach,impressions,profile_views"
+                                                                                    },
+                                                                                    {
+                                                                                        "name":  "period",
+                                                                                        "value":  "day"
+                                                                                    }
+                                                                                ]
+                                                             },
+                                         "options":  {
+                                                         "response":  {
+                                                                          "response":  {
+                                                                                           "fullResponse":  true,
+                                                                                           "neverError":  true
+                                                                                       }
+                                                                      }
+                                                     }
+                                     },
+                      "id":  "9bc8e4e2-a126-4d53-971e-b9de1646afcb",
+                      "name":  "IG Insights",
+                      "type":  "n8n-nodes-base.httpRequest",
+                      "typeVersion":  4.5,
+                      "position":  [
+                                       -16,
+                                       -96
+                                   ],
+                      "retryOnFail":  true,
+                      "maxTries":  3,
+                      "waitBetweenTries":  2000
+                  },
+                  {
+                      "parameters":  {
+                                         "url":  "=https://graph.facebook.com/v21.0/{{ $(\u0027Input\u0027).item.json.platform_account_id }}",
+                                         "authentication":  "predefinedCredentialType",
+                                         "nodeCredentialType":  "REDACTED_NODECREDENTIALTYPE",
+                                         "sendQuery":  true,
+                                         "queryParameters":  {
+                                                                 "parameters":  [
+                                                                                    {
+                                                                                        "name":  "fields",
+                                                                                        "value":  "followers_count,media_count"
+                                                                                    }
+                                                                                ]
+                                                             },
+                                         "options":  {
+                                                         "response":  {
+                                                                          "response":  {
+                                                                                           "fullResponse":  true,
+                                                                                           "neverError":  true
+                                                                                       }
+                                                                      }
+                                                     }
+                                     },
+                      "id":  "4c3dd4ab-b27d-4435-ae23-a82a338e2fcf",
+                      "name":  "IG Profile",
+                      "type":  "n8n-nodes-base.httpRequest",
+                      "typeVersion":  4.5,
+                      "position":  [
+                                       208,
+                                       -96
+                                   ],
+                      "retryOnFail":  true,
+                      "maxTries":  3,
+                      "waitBetweenTries":  2000
+                  },
+                  {
+                      "parameters":  {
+                                         "jsCode":  "\nconst input = $(\u0027Input\u0027).first().json;\nconst insights = $(\u0027IG Insights\u0027).first().json || {};\nconst profile = $(\u0027IG Profile\u0027).first().json || {};\n\nfunction statusOf(resp) {\n  const s = resp \u0026\u0026 resp.statusCode != null ? Number(resp.statusCode) : null;\n  return s;\n}\nfunction metricVal(resp, name) {\n  try {\n    const body = resp \u0026\u0026 resp.body ? resp.body : {};\n    const arr = Array.isArray(body.data) ? body.data : [];\n    const m = arr.find(function (d) { return d.name === name; });\n    if (!m || !Array.isArray(m.values) || !m.values.length) return null;\n    const v = m.values[0].value;\n    return v == null ? null : v;\n  } catch (e) { return null; }\n}\nfunction bodyField(resp, name) {\n  try {\n    const body = resp \u0026\u0026 resp.body ? resp.body : {};\n    return body[name] == null ? null : body[name];\n  } catch (e) { return null; }\n}\n\nconst iStatus = statusOf(insights);\nconst pStatus = statusOf(profile);\nconst statuses = [iStatus, pStatus];\nconst okCount = statuses.filter(function (s) { return s != null \u0026\u0026 s \u003e= 200 \u0026\u0026 s \u003c 300; }).length;\nconst total = statuses.length;\n\nlet data_status = \u0027FAILED\u0027;\nif (okCount === total) data_status = \u0027SUCCESS\u0027;\nelse if (okCount \u003e 0) data_status = \u0027PARTIAL\u0027;\n\nconst errors = [];\nif (iStatus == null || iStatus \u003c 200 || iStatus \u003e= 300) {\n  errors.push(\u0027IG insights HTTP \u0027 + (iStatus == null ? \u0027no-response\u0027 : iStatus));\n}\nif (pStatus == null || pStatus \u003c 200 || pStatus \u003e= 300) {\n  errors.push(\u0027IG profile HTTP \u0027 + (pStatus == null ? \u0027no-response\u0027 : pStatus));\n}\n\nconst out = {\n  run_id: input.run_id || null,\n  target_date: input.target_date || null,\n  account_id: input.account_id || null,\n  brand_id: input.brand_id || null,\n  brand_name: input.brand_name || null,\n  platform: \u0027Instagram\u0027,\n  account_type: input.account_type || null,\n  platform_account_id: input.platform_account_id || null,\n  followers: bodyField(profile, \u0027followers_count\u0027),\n  followers_gained: null,\n  followers_lost: null,\n  impressions: metricVal(insights, \u0027impressions\u0027),\n  reach: metricVal(insights, \u0027reach\u0027),\n  views: null,\n  likes: null,\n  comments: null,\n  shares: null,\n  saves: null,\n  engagements: null,\n  engagement_rate: null,\n  posts_published: null,\n  video_views: null,\n  watch_time: null,\n  profile_views: metricVal(insights, \u0027profile_views\u0027),\n  link_clicks: null,\n  data_status: data_status,\n  collected_at: new Date().toISOString(),\n  error_message: errors.length ? errors.join(\u0027; \u0027) : null,\n  http_status: okCount === total ? 200 : (statuses.find(function (s) { return s == null || s \u003c 200 || s \u003e= 300; }) || null),\n  operation: \u0027meta.instagram.daily_insights\u0027,\n};\nreturn [{ json: out }];\n"
+                                     },
+                      "id":  "51a3cda+00 0000 0000d0-a50c-1a5909c52bc2",
+                      "name":  "Normalize Instagram",
+                      "type":  "n8n-nodes-base.code",
+                      "typeVersion":  2,
+                      "position":  [
+                                       432,
+                                       -96
+                                   ]
+                  },
+                  {
+                      "parameters":  {
+                                         "url":  "=https://graph.facebook.com/v21.0/{{ $json.platform_account_id }}/insights",
+                                         "authentication":  "predefinedCredentialType",
+                                         "nodeCredentialType":  "REDACTED_NODECREDENTIALTYPE",
+                                         "sendQuery":  true,
+                                         "queryParameters":  {
+                                                                 "parameters":  [
+                                                                                    {
+                                                                                        "name":  "metric",
+                                                                                        "value":  "page_impressions,page_impressions_unique,page_post_engagements,page_fans"
+                                                                                    },
+                                                                                    {
+                                                                                        "name":  "period",
+                                                                                        "value":  "day"
+                                                                                    }
+                                                                                ]
+                                                             },
+                                         "options":  {
+                                                         "response":  {
+                                                                          "response":  {
+                                                                                           "fullResponse":  true,
+                                                                                           "neverError":  true
+                                                                                       }
+                                                                      }
+                                                     }
+                                     },
+                      "id":  "28ccb36a-cdaf-4a9b-9737-e571bbb59c0d",
+                      "name":  "FB Insights",
+                      "type":  "n8n-nodes-base.httpRequest",
+                      "typeVersion":  4.5,
+                      "position":  [
+                                       -16,
+                                       96
+                                   ],
+                      "retryOnFail":  true,
+                      "maxTries":  3,
+                      "waitBetweenTries":  2000
+                  },
+                  {
+                      "parameters":  {
+                                         "jsCode":  "\nconst input = $(\u0027Input\u0027).first().json;\nconst insights = $(\u0027FB Insights\u0027).first().json || {};\n\nfunction statusOf(resp) {\n  return resp \u0026\u0026 resp.statusCode != null ? Number(resp.statusCode) : null;\n}\nfunction metricVal(resp, name) {\n  try {\n    const body = resp \u0026\u0026 resp.body ? resp.body : {};\n    const arr = Array.isArray(body.data) ? body.data : [];\n    const m = arr.find(function (d) { return d.name === name; });\n    if (!m || !Array.isArray(m.values) || !m.values.length) return null;\n    const v = m.values[0].value;\n    return v == null ? null : v;\n  } catch (e) { return null; }\n}\n\nconst status = statusOf(insights);\nconst ok = status != null \u0026\u0026 status \u003e= 200 \u0026\u0026 status \u003c 300;\nconst data_status = ok ? \u0027SUCCESS\u0027 : \u0027FAILED\u0027;\n\nconst out = {\n  run_id: input.run_id || null,\n  target_date: input.target_date || null,\n  account_id: input.account_id || null,\n  brand_id: input.brand_id || null,\n  brand_name: input.brand_name || null,\n  platform: \u0027Facebook\u0027,\n  account_type: input.account_type || null,\n  platform_account_id: input.platform_account_id || null,\n  followers: metricVal(insights, \u0027page_fans\u0027),\n  followers_gained: null,\n  followers_lost: null,\n  impressions: metricVal(insights, \u0027page_impressions\u0027),\n  reach: metricVal(insights, \u0027page_impressions_unique\u0027),\n  views: null,\n  likes: null,\n  comments: null,\n  shares: null,\n  saves: null,\n  engagements: metricVal(insights, \u0027page_post_engagements\u0027),\n  engagement_rate: null,\n  posts_published: null,\n  video_views: null,\n  watch_time: null,\n  profile_views: null,\n  link_clicks: null,\n  data_status: data_status,\n  collected_at: new Date().toISOString(),\n  error_message: ok ? null : (\u0027FB insights HTTP \u0027 + (status == null ? \u0027no-response\u0027 : status)),\n  http_status: ok ? 200 : (status == null ? null : status),\n  operation: \u0027meta.facebook.daily_insights\u0027,\n};\nreturn [{ json: out }];\n"
+                                     },
+                      "id":  "fb+00 0000 0000c-4f38-9cd1-0b4c1daab692",
+                      "name":  "Normalize Facebook",
+                      "type":  "n8n-nodes-base.code",
+                      "typeVersion":  2,
+                      "position":  [
+                                       208,
+                                       96
+                                   ]
+                  },
+                  {
+                      "parameters":  {
+                                         "jsCode":  "\nconst input = $(\u0027Input\u0027).first().json;\nconst out = {\n  run_id: input.run_id || null,\n  target_date: input.target_date || null,\n  account_id: input.account_id || null,\n  brand_id: input.brand_id || null,\n  brand_name: input.brand_name || null,\n  platform: input.platform || null,\n  account_type: input.account_type || null,\n  platform_account_id: input.platform_account_id || null,\n  followers: null, followers_gained: null, followers_lost: null,\n  impressions: null, reach: null, views: null, likes: null, comments: null,\n  shares: null, saves: null, engagements: null, engagement_rate: null,\n  posts_published: null, video_views: null, watch_time: null,\n  profile_views: null, link_clicks: null,\n  data_status: \u0027FAILED\u0027,\n  collected_at: new Date().toISOString(),\n  error_message: \u0027Meta Collector called with unsupported platform: \u0027 + (input.platform || \u0027unknown\u0027),\n  http_status: null,\n  operation: \u0027meta.unsupported\u0027,\n};\nreturn [{ json: out }];\n"
+                                     },
+                      "id":  "39339ee+00 0000 0000f04-731e064dcf92",
+                      "name":  "Normalize Unsupported",
+                      "type":  "n8n-nodes-base.code",
+                      "typeVersion":  2,
+                      "position":  [
+                                       -16,
+                                       288
+                                   ]
+                  },
+                  {
+                      "parameters":  {
+                                         "jsCode":  "\nconst input = $(\u0027Input\u0027).first().json;\nconst out = {\n  run_id: input.run_id || null,\n  target_date: input.target_date || null,\n  account_id: input.account_id || null,\n  brand_id: input.brand_id || null,\n  brand_name: input.brand_name || null,\n  platform: input.platform || null,\n  account_type: input.account_type || null,\n  platform_account_id: input.platform_account_id || null,\n  followers: null, followers_gained: null, followers_lost: null,\n  impressions: null, reach: null, views: null, likes: null, comments: null,\n  shares: null, saves: null, engagements: null, engagement_rate: null,\n  posts_published: null, video_views: null, watch_time: null,\n  profile_views: null, link_clicks: null,\n  data_status: \u0027FAILED\u0027,\n  collected_at: new Date().toISOString(),\n  error_message: \u0027Missing Platform_Account_ID in Account_Master record; no API call attempted.\u0027,\n  http_status: null,\n  operation: \u0027meta.validate_input\u0027,\n};\nreturn [{ json: out }];\n"
+                                     },
+                      "id":  "c88cf79d-d4bb-4ffb-b85f-bcc42057b63a",
+                      "name":  "Missing Account ID",
+                      "type":  "n8n-nodes-base.code",
+                      "typeVersion":  2,
+                      "position":  [
+                                       -240,
+                                       304
+                                   ]
+                  }
+              ],
+    "connections":  {
+                        "Input":  {
+                                      "main":  [
+                                                   [
+                                                       {
+                                                           "node":  "Has Account ID?",
+                                                           "type":  "main",
+                                                           "index":  0
+                                                       }
+                                                   ]
+                                               ]
+                                  },
+                        "Has Account ID?":  {
+                                                "main":  [
+                                                             [
+                                                                 {
+                                                                     "node":  "Route by Platform",
+                                                                     "type":  "main",
+                                                                     "index":  0
+                                                                 }
+                                                             ],
+                                                             [
+                                                                 {
+                                                                     "node":  "Missing Account ID",
+                                                                     "type":  "main",
+                                                                     "index":  0
+                                                                 }
+                                                             ]
+                                                         ]
+                                            },
+                        "Route by Platform":  {
+                                                  "main":  [
+                                                               [
+                                                                   {
+                                                                       "node":  "IG Insights",
+                                                                       "type":  "main",
+                                                                       "index":  0
+                                                                   }
+                                                               ],
+                                                               [
+                                                                   {
+                                                                       "node":  "FB Insights",
+                                                                       "type":  "main",
+                                                                       "index":  0
+                                                                   }
+                                                               ],
+                                                               [
+                                                                   {
+                                                                       "node":  "Normalize Unsupported",
+                                                                       "type":  "main",
+                                                                       "index":  0
+                                                                   }
+                                                               ]
+                                                           ]
+                                              },
+                        "IG Insights":  {
+                                            "main":  [
+                                                         [
+                                                             {
+                                                                 "node":  "IG Profile",
+                                                                 "type":  "main",
+                                                                 "index":  0
+                                                             }
+                                                         ]
+                                                     ]
+                                        },
+                        "IG Profile":  {
+                                           "main":  [
+                                                        [
+                                                            {
+                                                                "node":  "Normalize Instagram",
+                                                                "type":  "main",
+                                                                "index":  0
+                                                            }
+                                                        ]
+                                                    ]
+                                       },
+                        "FB Insights":  {
+                                            "main":  [
+                                                         [
+                                                             {
+                                                                 "node":  "Normalize Facebook",
+                                                                 "type":  "main",
+                                                                 "index":  0
+                                                             }
+                                                         ]
+                                                     ]
+                                        }
+                    },
+    "pinData":  {
+
+                },
+    "meta":  {
+                 "instanceId":  "dcb7007d2a9977412bea33d09d5fbf2eca63d0e7f2ce59c7e8d5d882e83728e4"
+             },
+    "active":  false
+}
