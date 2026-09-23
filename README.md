@@ -1,28 +1,44 @@
-# AKcelerateHQ Automation Portfolio
+# AKcelerateHQ — Business Automation Systems Portfolio
 
-## Kalpesh Attarde
-
-**AI Automation Engineer | Business Process Automation Consultant**
+**Kalpesh Attarde · AI Automation Engineer · Business Process Automation Consultant**  
 Mumbai, India · [AKcelerateHQ](https://akceleratehq.com) · [GitHub](https://github.com/kalpeshattarde)
 
-I design practical AI-assisted business automation systems that connect workflows, APIs, communication channels, databases, and operational reporting. This portfolio presents inspectable workflow architectures for business owners, operations teams, and technical stakeholders.
+> We help businesses turn repetitive work into connected, trackable systems using AI, workflow automation, APIs, dashboards, and custom internal tools.
 
-The projects are portfolio workflow exports and architecture examples. Their documentation distinguishes demonstrated workflow structure from capabilities that still require credentials, testing, operational ownership, and production hardening.
+This repository contains business-facing solution concepts, workflow architectures, implementation references, and technical evidence for services offered through **AKcelerateHQ**. Each project is labelled honestly as a prototype, demo, sanitized implementation, or validation-ready workflow where applicable.
 
-## Featured Automation Systems
+## Solutions You Can Buy From AKcelerateHQ
 
-| Business-facing project | Business use case | Core capabilities | Status | Case study |
-|---|---|---|---|---|
-| **AgencyOS — Client Operations & Retention OS** | Agency and service-business operations | Client onboarding, proposals, project execution, invoicing, client health, retention, lead nurture, financial operations | Workflow prototype; validation required | [View case study](client-operations-retention-os/README.md) |
-| **LeadGen Engine — AI Lead Intelligence & Sales Automation** | Lead discovery and sales operations | Intent detection, enrichment, competitor intelligence, personalized drafts, human approval, nurture, evaluation | Workflow prototype; validation required | [View case study](ai-lead-intelligence-sales-automation/README.md) |
-| **MedFlow — Healthcare Practice Operations Automation** | Administrative workflows for medical practices | Patient intake, scheduling, communication, revenue-cycle patterns, reputation, inventory, practice intelligence | Architecture prototype; regulated deployment not evidenced | [View case study](healthcare-practice-operations-automation/README.md) |
-| **RestoFlow — Restaurant Revenue & Guest Experience Automation** | Hospitality operations and guest engagement | Voice intake, reservations, no-show prevention, messaging, CRM, loyalty, reviews, promotions, reporting | Workflow prototype; deployment and outcomes unverified | [View case study](restaurant-revenue-guest-experience-automation/README.md) |
-| **ZedProp — Property Management & Tenant Service Automation** | Tenant self-service and property operations | Tenant lookup, lease and payment requests, invoice retrieval, maintenance requests, document delivery, interaction logging | Demo implementation; validation required | [View case study](property-management-tenant-service-automation/README.md) |
-| **Wellness Vibe — Learner, Messaging & Social Operations Automation** | Education and learner operations | Graphy learner sync, payment reminders, campaign delivery, voice-scan alerts, social analytics, Google Sheets operations | Sanitized implementation source; validation required | [View case study](wellness-vibe-automation/README.md) |
+| Solution name | Who it is for | What we can build | Evidence / status |
+|---|---|---|---|
+| **Client Operations Automation Suite** | Agencies, consultants, and service businesses | Lead intake, onboarding, proposals, delivery tracking, invoices, client health, renewals, and follow-up workflows | Workflow prototype; client-specific validation required |
+| **AI Lead Generation & Sales Follow-up System** | B2B companies, agencies, and sales teams | Lead capture, intent detection, enrichment, AI-assisted research, personalized drafts, approvals, nurture, and CRM updates | Workflow prototype; credentials and channel testing required |
+| **Patient Appointment & Practice Operations System** | Clinics and healthcare practices | Patient intake, appointment requests, reminders, communication, administrative routing, and operational reporting | Architecture prototype; regulated deployment requires client review |
+| **Restaurant Booking & Guest Engagement System** | Restaurants, cafés, and hospitality businesses | Voice or form intake, reservation requests, no-show reminders, guest messaging, reviews, loyalty, and campaign reporting | Workflow prototype; deployment and outcomes require validation |
+| **Property & Tenant Support Automation** | Property managers and real-estate operators | Tenant self-service, maintenance requests, lease/payment queries, document delivery, and interaction logging | Demo implementation; validation required |
+| **Learning & Wellness Operations Automation** | Coaching, education, and wellness businesses | Learner sync, payment reminders, campaign delivery, session alerts, social reporting, and Google Sheets operations | Sanitized implementation source; validation required |
+| **AI Lead Capture & Qualification Workflow** | Businesses receiving website or campaign enquiries | Lead intake, qualification scoring, routing to discovery/manual review/nurture, and follow-up coordination | Public n8n workflow export with setup notes and Loom demo |
+| **AI Candidate Screening & Hiring Workflow** | HR teams and recruiting businesses | Resume-fit scoring, candidate routing, interview evaluation, and hiring workflow coordination | Public sanitized workflow export |
 
-## How AKcelerateHQ Works
+## Services
 
-I start with the business process, map the systems and data boundaries, implement the smallest useful workflow, test normal and exceptional cases, define human ownership, and document deployment and support requirements. Reliability includes duplicate prevention, rate-limit behavior, credential safety, logging, monitoring, rollback, and handover.
+- **Business process automation:** map repetitive work and design reliable workflows.
+- **AI workflow engineering:** classification, summarisation, extraction, drafting, routing, and assistants.
+- **CRM, WhatsApp, and email systems:** lead handling, follow-ups, alerts, campaigns, and handoffs.
+- **API and webhook integrations:** connect SaaS tools, databases, forms, and internal applications.
+- **Dashboards and reporting:** scheduled reports, operational metrics, data pipelines, and visibility layers.
+- **Custom internal tools and SaaS prototypes:** lightweight apps, dashboards, admin panels, and workflow control systems.
+- **Deployment and reliability support:** VPS setup, monitoring, logs, error handling, documentation, and handover planning.
+
+## How We Deliver
+
+1. Understand the current business process.
+2. Identify repetitive work, delays, and failure points.
+3. Design the workflow, data boundaries, and human approval steps.
+4. Build the smallest useful version.
+5. Test normal cases, edge cases, duplicates, failures, and permissions.
+6. Add logs, alerts, monitoring, documentation, and handover guidance.
+7. Improve the system based on actual usage and business feedback.
 
 ## Portfolio Navigation
 
@@ -37,6 +53,12 @@ I start with the business process, map the systems and data boundaries, implemen
 - [Delivery proof](docs/DELIVERY-PROOF.md)
 - [Workflow quality standards](docs/WORKFLOW-QUALITY-STANDARDS.md)
 
-## Contact
+## Important Evidence Note
 
-For a business process, integration, or operational workflow to assess, visit [akceleratehq.com](https://akceleratehq.com). Customization depends on the client’s systems, data, permissions, policies, and acceptance criteria.
+A public workflow export or architecture document does not automatically prove live production deployment, business results, compliance, or successful external execution. Final scope, integrations, security controls, operational ownership, and acceptance criteria are defined with each client before deployment.
+
+## Start a Project
+
+If your business has a repetitive process involving leads, CRM, WhatsApp, email, reports, payments, scheduling, or internal operations, contact us for a discovery discussion:
+
+**[Start a conversation with AKcelerateHQ](https://akceleratehq.com)**
