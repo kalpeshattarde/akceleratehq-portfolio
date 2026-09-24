@@ -1,18 +1,26 @@
 # Automation Systems
 
-These are portfolio workflow exports and architecture examples. Status labels describe repository evidence, not client deployment status.
+These projects are presented as business-facing automation systems. The status column describes repository evidence, not guaranteed client deployment or measured business results.
 
-| Business-facing name | Technical identifier | Business domain | System type | Status | Documentation |
-|---|---|---|---|---|---|
-| [AgencyOS — Client Operations & Retention OS](client-operations-retention-os/README.md) | AgencyOS | Agencies and service businesses | Automation system prototype | Workflow prototype; validation required | [Case study](client-operations-retention-os/README.md) |
-| [LeadGen Engine — AI Lead Intelligence & Sales Automation](ai-lead-intelligence-sales-automation/README.md) | LeadGen Engine | Sales and lead operations | Automation system prototype | Workflow prototype; validation required | [Case study](ai-lead-intelligence-sales-automation/README.md) |
-| [MedFlow — Healthcare Practice Operations Automation](healthcare-practice-operations-automation/README.md) | MedFlow | Medical-practice administration | Workflow architecture | Regulated deployment not evidenced | [Case study](healthcare-practice-operations-automation/README.md) |
-| [RestoFlow — Restaurant Revenue & Guest Experience Automation](restaurant-revenue-guest-experience-automation/README.md) | RestoFlow | Hospitality operations | Automation system prototype with demo variant | Deployment and outcomes unverified | [Case study](restaurant-revenue-guest-experience-automation/README.md) |
-| [ZedProp — Property Management & Tenant Service Automation](property-management-tenant-service-automation/README.md) | ZedProp | Property management and tenant services | Automation system with channel demo | Demo implementation; validation required | [Case study](property-management-tenant-service-automation/README.md) |
-| [Wellness Vibe — Learner, Messaging & Social Operations Automation](wellness-vibe-automation/README.md) | Wellness Vibe Automation | Education, learner operations, messaging, and social reporting | Multi-runtime automation system | Sanitized implementation source; validation required | [Case study](wellness-vibe-automation/README.md) |
+| Business-facing solution | Repository | Business impact mechanism | Status |
+|---|---|---|---|
+| **AI Lead Capture & Qualification** | [Case study](akceleratehq-lead-capture-automation/README.md) | Saves sales/admin time through AI scoring, routing, and automated next actions; helps prioritize high-intent enquiries. | Public workflow export; validation required |
+| **AI Lead Intelligence & Sales Automation** | [Case study](ai-lead-intelligence-sales-automation/README.md) | Reduces prospect research, enrichment, drafting, and state-update effort; creates more capacity for sales follow-up. | Workflow prototype; validation required |
+| **AI Candidate Screening & Hiring** | [Case study](ai-candidate-screening-hr-ats/README.md) | Reduces repetitive resume review and structures candidate screening; supports faster hiring operations. | Public sanitized workflow export |
+| **Client Operations & Retention Automation** | [Case study](client-operations-retention-os/README.md) | Reduces coordination across intake, delivery, billing, scheduling, and retention workflows. | Workflow prototype; validation required |
+| **Practice Operations Automation** | [Case study](healthcare-practice-operations-automation/README.md) | Targets repetitive administrative workload while preserving human control for sensitive decisions. | Architecture prototype; regulated deployment not evidenced |
+| **Restaurant Revenue & Guest Experience Automation** | [Case study](restaurant-revenue-guest-experience-automation/README.md) | Automates guest-service and reservation workflows to improve response consistency and create capacity for hospitality teams. | Prototype/demo; outcomes unverified |
+| **Property & Tenant Support Automation** | [Case study](property-management-tenant-service-automation/README.md) | Automates common tenant requests, document flows, maintenance routing, and interaction logging. | Demo implementation; validation required |
+| **Learning & Wellness Operations Automation** | [Case study](wellness-vibe-automation/README.md) | Automates reminders, campaigns, learner sync, reporting, social analytics, and recurring operations. | Sanitized implementation source; validation required |
 
-## Reading the Projects
+## How to Read Business Impact
 
-Each case study leads with the operational problem, then explains supported functionality, customization opportunities, technical architecture, delivery readiness, and next steps. Technical identifiers remain visible for traceability to folders and workflow exports. A node, sticky note, screenshot, or JSON export is not by itself proof of successful external execution, a live deployment, a business result, or compliance.
+Each project is explained using three lenses:
+
+- **Time saved:** which repetitive human steps the system automates or coordinates.
+- **Revenue capacity:** how faster lead handling, retention support, better follow-up, or lower admin load can create capacity for growth work.
+- **Operational visibility:** how structured records, reports, alerts, and logs improve decision-making.
+
+These are mechanisms and intended outcomes, not guarantees of a specific ROI. Measured results should be added only when verified for the relevant implementation.
 
 [Portfolio home](README.md) · [Delivery proof](docs/DELIVERY-PROOF.md) · [Implementation readiness](docs/IMPLEMENTATION-READINESS.md)
